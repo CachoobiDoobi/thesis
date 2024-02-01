@@ -1,7 +1,11 @@
+from functools import reduce
+
+import gymnasium.spaces
 from gymnasium.spaces import Discrete, MultiDiscrete
 import numpy as np
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
+from ray.rllib.utils.typing import MultiAgentDict, MultiEnvDict
 
 
 class MultiAgentArena(MultiAgentEnv):
@@ -24,7 +28,7 @@ class MultiAgentArena(MultiAgentEnv):
         # Reset env.
         self.reset()
 
-    def reset(self,  *, seed=None, options=None):
+    def reset(self, *, seed=None, options=None):
         """Returns initial observation of next(!) episode."""
         # Row-major coords.
         self.agent1_pos = [0, 0]  # upper left corner
@@ -94,7 +98,7 @@ class MultiAgentArena(MultiAgentEnv):
             "__all__": is_done,
         }
 
-        return obs, rewards, terminateds, truncateds,  {}  # <- info dict (not needed here).
+        return obs, rewards, terminateds, truncateds, {}  # <- info dict (not needed here).
 
     def _get_obs(self):
         """
@@ -106,8 +110,8 @@ class MultiAgentArena(MultiAgentEnv):
         ag2_discrete_pos = self.agent2_pos[0] * self.width + \
                            (self.agent2_pos[1] % self.width)
         return {
-            "agent1": np.array([ag1_discrete_pos, ag2_discrete_pos]),
-            "agent2": np.array([ag2_discrete_pos, ag1_discrete_pos]),
+            "agent1": np.array([ag1_discrete_pos, ag2_discrete_pos], dtype=np.int64),
+            "agent2": np.array([ag2_discrete_pos, ag1_discrete_pos], dtype=np.int64),
         }
 
     def _move(self, coords, action, is_agent1):
@@ -149,6 +153,24 @@ class MultiAgentArena(MultiAgentEnv):
         # No new tile for agent1.
         return set()
 
+    def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
+        if agent_ids is None:
+            return {agent_id: self.observation_space.sample() for agent_id in self._agent_ids}
+        else:
+            return {agent_id: self.action_space.sample() for agent_id in agent_ids}
+
+    def observation_space_sample(self, agent_ids: list = None) -> MultiEnvDict:
+        if agent_ids is None:
+            return {agent_id: self.observation_space.sample() for agent_id in self._agent_ids}
+        else:
+            return {agent_id: self.observation_space.sample() for agent_id in agent_ids}
+
+    def observation_space_contains(self, x: MultiAgentDict) -> bool:
+        return reduce(lambda n, m: n and m, [self.observation_space.contains(o) for o in x.values()])
+
+    def action_space_contains(self, x: MultiAgentDict) -> bool:
+        return reduce(lambda n, m: n and m, [self.action_space.contains(o) for o in x.values()])
+
     def render(self, mode=None):
         print("_" * (self.width + 2))
         for r in range(self.height):
@@ -169,7 +191,6 @@ class MultiAgentArena(MultiAgentEnv):
         print("R1={: .1f}".format(self.agent1_R))
         print("R2={: .1f}".format(self.agent2_R))
         print()
-
 
 # env = MultiAgentArena()
 #
