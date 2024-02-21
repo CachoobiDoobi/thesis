@@ -1,4 +1,5 @@
 import math
+import sys
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Optional, Tuple
@@ -11,9 +12,8 @@ from ray.rllib.utils.typing import MultiAgentDict, MultiEnvDict
 from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, \
     ConstantVelocity
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
-
+import time
 from simulation import Simulation
-
 
 class MultiAgentTrackingEnv(MultiAgentEnv):
     def __init__(self, env_config=None):
@@ -50,7 +50,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         start_time = datetime.now()
 
-        transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(50)])
+        transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(100)])
 
         # 1d model
         truth = GroundTruthPath([GroundTruthState([0, 1], timestamp=start_time)])
@@ -61,7 +61,6 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
                 timestamp=start_time + timedelta(seconds=k)))
 
         self.truth = truth
-
         return self._get_obs(), {}
 
     def step(self, action_dict):
@@ -74,12 +73,17 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         velocity = torch.tensor([self.truth[self.timesteps - 1].state_vector[1]])
 
         detections = []
+        start_time = time.time()
         for agent in action_dict:
             sim = Simulation(range, velocity, [torch.tensor([1.0 + 0.0j])])
-            detections.append(sim.detect(action_dict[agent]))
-
+            d = sim.detect(action_dict[agent])
+            detections.append(d)
+            if len(d) == 0:
+                print(agent + " agent has found 0 targets (CFAR/clustering)")
+            # TODO what do with measurements
+        print("---Time for all agent simulations: %s seconds ---" % (time.time() - start_time))
         # Determine rewards
-        rewards = {"baseline": np.random.normal(0,1)}
+        rewards = {"baseline": self.reward(list(zip(range.numpy(), velocity.numpy())), detections)}
 
         self.rewards = dict.fromkeys(self.rewards,
                                      np.array(list(rewards.values())) + np.array(list(self.rewards.values())))
@@ -99,8 +103,8 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
     def _get_obs(self):
         obs = self.actions
         # for agent in self._agent_ids:
-        #     # if len(self.measurements) > 0:
-        #     obs[agent]['measurement'] = self.measurements[-1] if len(self.measurements) > 0 else self.observation_space.sample()['measurement']
+            # if len(self.measurements) > 0:
+            # obs[agent]['measurement'] = self.measurements[-1] if len(self.measurements) > 0 else [0, 0]
         return obs
 
     def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
@@ -129,10 +133,10 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         reward = 0
         for t in truth:
             for p in prediction:
-                # what to do when no prediction?
+                # map to distances to 0 1 range ( a reward of 0 for max distance and 1 for 0 distance) could be non linear scale to not let it gamify
                 if len(p) != 0:
                     reward -= math.dist(t, p)
                 else:
-                    reward = -math.inf
+                    reward = -100
                     break
         return reward

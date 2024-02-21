@@ -9,6 +9,9 @@ from scipy.constants import c
 from torch import Tensor
 from sklearn.cluster import DBSCAN
 from pyapril import caCfar
+import time
+
+from prototype.utils import SNR
 
 
 class Simulation:
@@ -19,6 +22,7 @@ class Simulation:
 
     def detect(self, parameters):
 
+        # start_time = time.time()
         # for now single burst
         bandwidth = parameters.get('bandwidth', 10e6)
         pulse_duration = parameters.get('pulse_duration', [10E-6])[0]
@@ -56,50 +60,48 @@ class Simulation:
         X = self.simulate_target_with_scene_profile(signal, scene, num_pulses=n_pulses)
         image = self.doppler_processing(signal, X, nfft_range, nfft_doppler)
 
-
-        detections = self.cfar(image, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range, signal)
+        detections = self.CFAR(image=image, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel, nfft_doppler=nfft_doppler,nfft_range=nfft_range)
         # detections = self.cfar_april(image, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range)
-
+        # print("--- %s seconds ---" % (time.time() - start_time))
         return detections[0] if len(detections) > 0 else []
 
-    def cfar_april(self, x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range):
-        r_res = max_unamb_range / nfft_range
-        v_res = max_unamb_vel / nfft_doppler
-        k_width = int(np.ceil(r_res * 8))
-        k_height = int(np.ceil(v_res * 18))
-        inner_width = k_width // 2
-        inner_height = k_height // 2
+    # def cfar_april(self, x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range):
+    #     r_res = max_unamb_range / nfft_range
+    #     v_res = max_unamb_vel / nfft_doppler
+    #     k_width = int(np.ceil(r_res * 8))
+    #     k_height = int(np.ceil(v_res * 18))
+    #     inner_width = k_width // 2
+    #     inner_height = k_height // 2
+    #
+    #     x = x.squeeze(0)
+    #     print("starting detection")
+    #     cfar = CA_CFAR([k_height, k_width, inner_height, inner_width], 22, x.shape)
+    #     detection = cfar(x)
+    #     print(detection)
+    #     return detection
 
-        x = x.squeeze(0)
-        print("starting detection")
-        cfar = CA_CFAR([k_height, k_width, inner_height, inner_width], 22, x.shape)
-        detection = cfar(x)
-        print(detection)
-        return detection
-
-    def cfar(self, image, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range, plot=False):
-        # 0 noise for now
-        noise = torch.normal(0,1000,image.shape)
-        # print(f'SNR: {SNR(image, noise)}')
-        image = torch.abs(image + noise)
+    def CFAR(self,image, max_unamb_range, max_unamb_vel,nfft_range,nfft_doppler, alpha=5, plot=False):
         image = image.reshape(1, 1, nfft_doppler, nfft_range)
+        noise = torch.normal(0, 1000, image.shape)
+        # SINR = SNR(image, noise)
+
+        # print(f'SINR: {SINR}')
+        image = torch.abs(image + noise)
+        # create kernel
         r_res = max_unamb_range / nfft_range
         v_res = max_unamb_vel / nfft_doppler
-        # TODO set these values in a smart manner?
-        k_width = int(np.ceil(r_res * 16))
-        k_height = int(np.ceil(v_res * 10))
-        # create kernel
+        k_width = 40#int(np.ceil(r_res * 8))
+        k_height = 1#int(np.ceil(v_res * 5))
         kernel = torch.ones((1, 1, k_height, k_width))
-        inner_width = k_width // 4
-        inner_height = k_height // 4
-        kernel[0, 0, (k_height - inner_height) // 2: (k_height + inner_height) // 2,
-        (k_width - inner_width) // 2: (k_width + inner_width) // 2] = 0
+        inner_width = 6#k_width // 4
+        inner_height = 0#k_height // 4
+        kernel[0, 0, :, (k_width - inner_width) // 2: (k_width + inner_width) // 2] = 0
         kernel = kernel / kernel.sum()
-
         # convolve image
-        convd = torch.nn.functional.conv2d(input=image, weight=kernel, padding='valid', stride=1)
+        convd = torch.nn.functional.conv2d(input=image, weight=kernel, padding='valid', stride=1,)
         # compare with estimated noise power
         threshold = image[0, 0, :convd.shape[2], :convd.shape[3]] > convd * alpha
+
 
         # some reshaping
         final_x = threshold.reshape(nfft_doppler - k_height + 1, nfft_range - k_width + 1).detach().numpy()
@@ -108,13 +110,17 @@ class Simulation:
                              final_x[0] * max_unamb_vel * 2 / nfft_doppler - max_unamb_vel))[0]
 
         # clustering
+        return self.clustering(image=image, final_x=final_x, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel, nfft_doppler=nfft_doppler, nfft_range=nfft_range,plot=False)
+
+    def clustering(self,image, final_x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range, plot):
+        if len(final_x) == 0:
+            print("NO TARGET FOUND(CFAR)")
+            return []
         db = DBSCAN(eps=50, min_samples=10).fit(final_x)
         labels = db.labels_
-
         # Number of clusters in labels, ignoring noise if present.
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
         n_noise_ = list(labels).count(-1)
-
         unique_labels = set(labels)
         core_samples_mask = np.zeros_like(labels, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
@@ -150,7 +156,6 @@ class Simulation:
 
             plt.title(f"Estimated number of clusters: {n_clusters_}")
             plt.show()
-
         xs = []
         ys = []
         for k in unique_labels:
@@ -163,13 +168,13 @@ class Simulation:
             powers = image[0, 0, v, r]
             x = (powers * xy[:, 0]).sum() / powers.sum()
             y = (powers * xy[:, 1]).sum() / powers.sum()
-            xs.append(x.item())
-            ys.append(y.item())
+            if not (x.isnan() or y.isnan()):
+                xs.append(x.item())
+                ys.append(y.item())
         if plot:
             plt.scatter(xs, ys)
             plt.show()
-        detections = list(zip(xs, ys))
-        return detections
+        return list(zip(xs, ys))
 
     def generate_waveform(self, bandwidth, pulse_duration, n_pulses, t, wait_time):
         k = bandwidth / pulse_duration
