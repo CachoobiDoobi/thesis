@@ -43,11 +43,11 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
 
 config = (
     PPOConfig().environment(env=MultiAgentTrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=6)
+    .rollouts(num_rollout_workers=5)
     .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_cpus_per_worker=1, num_gpus=0)
+    .resources(num_cpus_per_worker=1, num_gpus=1)
     .training(train_batch_size=tune.choice([8]), sgd_minibatch_size=tune.choice([4]), num_sgd_iter=tune.choice([10]))
     # .environment(disable_env_checking=True)
 

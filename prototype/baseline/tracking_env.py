@@ -83,7 +83,8 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
             # TODO what do with measurements
         print("---Time for all agent simulations: %s seconds ---" % (time.time() - start_time))
         # Determine rewards
-        rewards = {"baseline": self.reward(list(zip(range.numpy(), velocity.numpy())), detections)}
+        max_ua_range, max_ua_velocity = sim.get_max_unambigous()
+        rewards = {"baseline": self.reward(list(zip(range.numpy(), velocity.numpy())), detections, max_ua_range, max_ua_velocity)}
 
         self.rewards = dict.fromkeys(self.rewards,
                                      np.array(list(rewards.values())) + np.array(list(self.rewards.values())))
@@ -129,14 +130,15 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
             return True
         return reduce(lambda n, m: n and m, [self.action_space.contains(o) for o in x.values()])
 
-    def reward(self, truth, prediction):
+    def reward(self, truth, prediction, max_ua_range, max_ua_velocity):
+        max_dist = math.dist([-max_ua_range, -max_ua_velocity], [max_ua_range, max_ua_velocity])
         reward = 0
         for t in truth:
             for p in prediction:
                 # map to distances to 0 1 range ( a reward of 0 for max distance and 1 for 0 distance) could be non linear scale to not let it gamify
                 if len(p) != 0:
-                    reward -= math.dist(t, p)
+                    reward += 1 - math.dist(t, p) / max_dist
                 else:
-                    reward = -100
+                    reward = 0
                     break
         return reward

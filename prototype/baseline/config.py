@@ -1,4 +1,4 @@
-convert = {
+param_dict = {
     "pulse_duration": {
         1: 10e-6,
         2: 20e-6,
@@ -7,6 +7,10 @@ convert = {
         5: 50e-6,
     },
     "PRI": {
-
+        1: 2e-3,
+        2: 2.5e-3,
+        3: 3e-3,
+        4: 3.5e-3,
+        5: 4e-3,
     }
 }

@@ -10,8 +10,7 @@ from torch import Tensor
 from sklearn.cluster import DBSCAN
 from pyapril import caCfar
 import time
-
-from prototype.utils import SNR
+from config import param_dict
 
 
 class Simulation:
@@ -19,15 +18,17 @@ class Simulation:
         self.ranges = ranges
         self.velocities = velocities
         self.amplitudes = amplitudes
+        self.max_unamb_range = 0
+        self.max_unamb_velocity = 0
 
     def detect(self, parameters):
 
         # start_time = time.time()
         # for now single burst
         bandwidth = parameters.get('bandwidth', 10e6)
-        pulse_duration = parameters.get('pulse_duration', [10E-6])[0]
+        pulse_duration = param_dict["pulse_duration"][parameters.get('pulse_duration', 1)]
         n_pulses = max(parameters.get('n_pulses', 30), 1)
-        pri = parameters.get('PRI', [5e-4])[0]
+        pri = param_dict["PRI"][parameters.get('PRI', 1)]
 
         fs = parameters.get('bandwidth', 4 * bandwidth)
 
@@ -45,6 +46,9 @@ class Simulation:
         max_unamb_range = c * (total_duration - pulse_duration) / 2
         max_unamb_vel = c / (4 * fc * total_duration)
 
+        self.max_unamb_range = max_unamb_range
+        self.max_unamb_velocity = max_unamb_vel
+
         signal = self.generate_waveform(bandwidth, pulse_duration, n_pulses, t, wait_time)
 
         nfft_range = 2 * signal.shape[1] - 1
@@ -60,7 +64,8 @@ class Simulation:
         X = self.simulate_target_with_scene_profile(signal, scene, num_pulses=n_pulses)
         image = self.doppler_processing(signal, X, nfft_range, nfft_doppler)
 
-        detections = self.CFAR(image=image, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel, nfft_doppler=nfft_doppler,nfft_range=nfft_range)
+        detections = self.CFAR(image=image, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel,
+                               nfft_doppler=nfft_doppler, nfft_range=nfft_range)
         # detections = self.cfar_april(image, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range)
         # print("--- %s seconds ---" % (time.time() - start_time))
         return detections[0] if len(detections) > 0 else []
@@ -80,7 +85,7 @@ class Simulation:
     #     print(detection)
     #     return detection
 
-    def CFAR(self,image, max_unamb_range, max_unamb_vel,nfft_range,nfft_doppler, alpha=5, plot=False):
+    def CFAR(self, image, max_unamb_range, max_unamb_vel, nfft_range, nfft_doppler, alpha=5, plot=False):
         image = image.reshape(1, 1, nfft_doppler, nfft_range)
         noise = torch.normal(0, 1000, image.shape)
         # SINR = SNR(image, noise)
@@ -90,18 +95,17 @@ class Simulation:
         # create kernel
         r_res = max_unamb_range / nfft_range
         v_res = max_unamb_vel / nfft_doppler
-        k_width = 40#int(np.ceil(r_res * 8))
-        k_height = 1#int(np.ceil(v_res * 5))
+        k_width = 40  # int(np.ceil(r_res * 8))
+        k_height = 1  # int(np.ceil(v_res * 5))
         kernel = torch.ones((1, 1, k_height, k_width))
-        inner_width = 6#k_width // 4
-        inner_height = 0#k_height // 4
+        inner_width = 6  # k_width // 4
+        inner_height = 0  # k_height // 4
         kernel[0, 0, :, (k_width - inner_width) // 2: (k_width + inner_width) // 2] = 0
         kernel = kernel / kernel.sum()
         # convolve image
-        convd = torch.nn.functional.conv2d(input=image, weight=kernel, padding='valid', stride=1,)
+        convd = torch.nn.functional.conv2d(input=image, weight=kernel, padding='valid', stride=1, )
         # compare with estimated noise power
         threshold = image[0, 0, :convd.shape[2], :convd.shape[3]] > convd * alpha
-
 
         # some reshaping
         final_x = threshold.reshape(nfft_doppler - k_height + 1, nfft_range - k_width + 1).detach().numpy()
@@ -110,9 +114,11 @@ class Simulation:
                              final_x[0] * max_unamb_vel * 2 / nfft_doppler - max_unamb_vel))[0]
 
         # clustering
-        return self.clustering(image=image, final_x=final_x, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel, nfft_doppler=nfft_doppler, nfft_range=nfft_range,plot=False)
+        return self.clustering(image=image, final_x=final_x, max_unamb_range=max_unamb_range,
+                               max_unamb_vel=max_unamb_vel, nfft_doppler=nfft_doppler, nfft_range=nfft_range,
+                               plot=False)
 
-    def clustering(self,image, final_x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range, plot):
+    def clustering(self, image, final_x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range, plot):
         if len(final_x) == 0:
             print("NO TARGET FOUND(CFAR)")
             return []
@@ -252,3 +258,6 @@ class Simulation:
         scene_profile = self.ifft(torch.multiply(kernel, scene_profile), nfft=nfft_range, dim=-1)
 
         return scene_profile
+
+    def get_max_unambigous(self):
+        return self.max_unamb_range, self.max_unamb_velocity
