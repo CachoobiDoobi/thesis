@@ -26,9 +26,9 @@ class Simulation:
         # start_time = time.time()
         # for now single burst
         bandwidth = parameters.get('bandwidth', 10e6)
-        pulse_duration = param_dict["pulse_duration"][parameters.get('pulse_duration', 1)]
+        pulse_duration = param_dict["pulse_duration"][max(1, parameters.get('pulse_duration', 1))]
         n_pulses = max(parameters.get('n_pulses', 30), 1)
-        pri = param_dict["PRI"][parameters.get('PRI', 1)]
+        pri = param_dict["PRI"][max(1, parameters.get('PRI', 1))]
 
         fs = parameters.get('bandwidth', 4 * bandwidth)
 
@@ -103,6 +103,7 @@ class Simulation:
         kernel[0, 0, :, (k_width - inner_width) // 2: (k_width + inner_width) // 2] = 0
         kernel = kernel / kernel.sum()
         # convolve image
+        # print("IMage size", image.shape)
         convd = torch.nn.functional.conv2d(input=image, weight=kernel, padding='valid', stride=1, )
         # compare with estimated noise power
         threshold = image[0, 0, :convd.shape[2], :convd.shape[3]] > convd * alpha
@@ -180,7 +181,7 @@ class Simulation:
         if plot:
             plt.scatter(xs, ys)
             plt.show()
-        return list(zip(xs, ys))
+        return np.dstack((xs, ys))
 
     def generate_waveform(self, bandwidth, pulse_duration, n_pulses, t, wait_time):
         k = bandwidth / pulse_duration

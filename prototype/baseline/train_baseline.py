@@ -1,16 +1,15 @@
 import copy
+import os
 import pprint
-import random
 
 import numpy as np
-import ray
-from gymnasium.spaces import Dict
-from gymnasium.spaces import Discrete, Box
-from ray import tune, air
-from ray.rllib.algorithms import PPOConfig
+from gymnasium.spaces import Dict, Box, Sequence
+from gymnasium.spaces import Discrete
+from ray import tune, air, train
+from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
-from tracking_env import MultiAgentTrackingEnv
+from tracking_env import TrackingEnv
 
 agents = ['baseline',
           ]
@@ -18,12 +17,11 @@ agents = ['baseline',
 # pulse duration -> 10 - 50 us
 # pRI - prime would be nice, [2,4] kHz
 action_space = Dict(
-    {'pulse_duration': Discrete(5, start=1), 'PRI': Discrete(5, start=1), 'n_pulses': Discrete(30, start=10)})
+    {'pulse_duration': Discrete(5, start=1), 'PRI': Discrete(5, start=1), 'n_pulses': Discrete(21, start=10)})
 observation_space = copy.deepcopy(action_space)
-# observation_space['measurement'] = Box(low=np.array([-1e3, -1e5]), high=np.array([1e3, 1e5]))
-# print(observation_space.sample()['measurement'])
+observation_space['measurement'] = Box(low=np.array([-1e5, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64)
 env_config = {
-    "ts": 10,
+    "ts": 5,
     'agents': agents,
     # Actions -> [pulse_duration, n_pulses, bandwidth, PRF]
     'action_space': action_space,
@@ -42,20 +40,21 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
 
 
 config = (
-    PPOConfig().environment(env=MultiAgentTrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=5)
-    .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
+    PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
+    .rollouts(num_rollout_workers=6)
+    # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_cpus_per_worker=1, num_gpus=1)
-    .training(train_batch_size=tune.choice([8]), sgd_minibatch_size=tune.choice([4]), num_sgd_iter=tune.choice([10]))
-    # .environment(disable_env_checking=True)
+    .resources(num_cpus_per_worker=1, num_gpus=0)
+    .training(train_batch_size=8, sgd_minibatch_size=4, num_sgd_iter=10)
+    .environment(disable_env_checking=True)
 
 )
 
 stop = {
     # "training_iteration": 1,
     # "time_budget_s": 60
+    "episode_reward_mean": 9.99
 }
 
 # algo = config.build()
@@ -65,8 +64,9 @@ stop = {
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1),
-    tune_config=tune.TuneConfig(metric="episode_reward_mean", mode='max',time_budget_s=1800),
+    run_config=air.RunConfig(stop=stop, verbose=1, checkpoint_config=train.CheckpointConfig(
+        checkpoint_frequency=1, checkpoint_at_end=True)),
+    tune_config=tune.TuneConfig(metric="episode_reward_mean", mode='max'),
 ).fit()
 
 best_result = results.get_best_result()
@@ -78,6 +78,25 @@ metrics_to_print = [
     "episode_reward_mean",
     "episode_reward_max",
     "episode_reward_min",
-    "episode_len_mean",
 ]
 pprint.pprint({k: v for k, v in best_result.metrics.items() if k in metrics_to_print})
+
+agent = Algorithm.from_checkpoint(best_result.checkpoint)
+# agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
+
+env = TrackingEnv(env_config=config["env_config"])
+
+obs = {"PRI": 1, "n_pulses": 10, 'pulse_duration': 1}
+
+truncated = False
+
+while not truncated:
+
+    parameters = agent.compute_single_action(obs, policy_id='baseline')
+    print(parameters)
+    obs, reward, _, truncated, _ = env.step({"baseline": parameters})
+
+    obs = obs["baseline"]
+    truncated = truncated["__all__"]
+
+env.render()
