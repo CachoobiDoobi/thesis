@@ -39,7 +39,10 @@ class TrackingEnv(gymnasium.Env):
 
         self.measurements = []
 
+        self.target_resolution = 20
+
         self.reset()
+
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
         # reset rewards
@@ -65,43 +68,49 @@ class TrackingEnv(gymnasium.Env):
     def step(self, action_dict):
         self.timesteps += 1
 
-        action_dict["pulse_duration"] = max(1, action_dict.get('pulse_duration', 1))
-        action_dict["PRI"] = max(1, action_dict.get('PRI', 1))
+        action_dict["pulse_duration"] = max(0, action_dict.get('pulse_duration', 0))
+        action_dict["PRI"] = max(0, action_dict.get('PRI', 0))
         action_dict["n_pulses"] = max(action_dict.get('n_pulses', 30), 10)
 
         # keep track of current action
         self.actions = action_dict
-        print("actions ", self.actions)
+        # print("actions ", self.actions)
         range = torch.tensor([self.truth[self.timesteps - 1].state_vector[0]])
         velocity = torch.tensor([self.truth[self.timesteps - 1].state_vector[1]])
 
         sim = Simulation(range, velocity, torch.tensor([1.0]) * torch.exp(1j * torch.normal(0, 1, range.shape)))
         detection = sim.detect(action_dict)
+
+        doppler_resolution = sim.doppler_resolution
+
         if np.count_nonzero(detection) != 0:
             self.measurements.append(detection)
-        else:
-            print("no detections", self.timesteps)
+        # else:
+        #     print("no detections", self.timesteps)
 
         # Determine rewards
         max_ua_range, max_ua_velocity = sim.get_max_unambigous()
         rewards = self.reward(np.dstack((range.numpy(), velocity.numpy()))[0], detection.astype(np.float64),
-                              max_ua_range, max_ua_velocity)
-
+                              max_ua_range, max_ua_velocity, doppler_resolution)
         truncated = self.timesteps >= self.timestep_limit
         terminated = False
 
         obs = self._get_obs()
-
         info = {}
         return obs, rewards, terminated, truncated, info
 
     def _get_obs(self):
+        if self.timesteps == 0:
+            # TODO how to return empty obs?
+            return self.observation_space.sample()
         obs = self.actions
+        obs['target_res'] = 20
         if len(self.measurements) > 0:
-            obs['measurement'] = self.measurements[-1]
+            obs['measurement'] = np.asarray(self.measurements[-1][0], dtype=np.float64)
             # print(obs, type(self.measurements[-1]))
         else:
-            obs = self.observation_space.sample()
+            obs['measurement'] = np.array([0, 0], dtype=np.float64)
+        #     # obs = self.observation_space.sample()
         return obs
 
     def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
@@ -119,7 +128,6 @@ class TrackingEnv(gymnasium.Env):
             return {agent_id: self.observation_space.sample() for agent_id in agent_ids}
 
     def observation_space_contains(self, x: MultiAgentDict) -> bool:
-        print("is this ever CALLED?")
         if self.timesteps == 0:
             return True
         return reduce(lambda n, m: n and m, [self.observation_space.contains(o) for o in x.values()])
@@ -129,7 +137,7 @@ class TrackingEnv(gymnasium.Env):
             return True
         return reduce(lambda n, m: n and m, [self.action_space.contains(o) for o in x.values()])
 
-    def reward(self, truth, prediction, max_ua_range, max_ua_velocity):
+    def reward(self, truth, prediction, max_ua_range, max_ua_velocity, doppler_resolution):
         max_dist = math.dist([-max_ua_range, -max_ua_velocity], [max_ua_range, max_ua_velocity])
         reward = 0
         # print("truth ", truth)
@@ -141,6 +149,8 @@ class TrackingEnv(gymnasium.Env):
                     reward += 1 - np.linalg.norm(t - p) / max_dist
                 else:
                     reward = 0
+        print(reward, (1 - (abs(self.target_resolution - doppler_resolution) / self.target_resolution)))
+        reward = 0.5 * reward + 0.5 * (1 - min(1,(abs(self.target_resolution - doppler_resolution) / self.target_resolution)))
         return reward
 
     def render(self):
@@ -150,8 +160,8 @@ class TrackingEnv(gymnasium.Env):
 
         # print("truth", ground_truth)
         # print("measurements", np.array(self.measurements).shape)
-        ground_truth = np.array(ground_truth)
-        measurements = np.array(self.measurements)[:, 0, 0, :]
+        ground_truth = np.asarray(ground_truth)
+        measurements = np.asarray(self.measurements)[:, 0, :]
 
         plt.scatter(ground_truth[:, 0], ground_truth[:, 1], label='Truth')
         plt.scatter(measurements[:, 0], measurements[:, 1], label='Measured')

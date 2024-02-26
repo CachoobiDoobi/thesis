@@ -20,6 +20,7 @@ class Simulation:
         self.amplitudes = amplitudes
         self.max_unamb_range = 0
         self.max_unamb_velocity = 0
+        self.doppler_resolution = 0
 
     def detect(self, parameters):
 
@@ -53,6 +54,11 @@ class Simulation:
 
         nfft_range = 2 * signal.shape[1] - 1
         nfft_doppler = 1024
+
+        # TODO what about pulse length
+        self.doppler_resolution = self.max_unamb_velocity / n_pulses
+
+        # print(self.doppler_resolution)
 
         scene = self.make_scene(self.amplitudes, self.ranges, self.velocities, max_unamb_range, max_unamb_vel,
                                 nfft_range, nfft_doppler)
