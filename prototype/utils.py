@@ -179,7 +179,7 @@ def SNR(signal, noise):
     N = fft(noise, nfft=signal.shape[-1])
 
     snr = 20 * torch.log(torch.linalg.vector_norm(torch.conj(S) * S) / torch.linalg.vector_norm(torch.conj(S) * N))
-    return snr
+    return snr.float().detach().numpy()
 
 
 # %%

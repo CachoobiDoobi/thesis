@@ -44,7 +44,7 @@ class TrackingEnv(gymnasium.Env):
 
         self.snrs = []
 
-        self.target_resolution = np.random.choice(np.arange(10, 50))
+        self.target_resolution =  np.random.choice(np.arange(20, 40))
 
         self.resolutions = []
 
@@ -73,6 +73,7 @@ class TrackingEnv(gymnasium.Env):
                 timestamp=start_time + timedelta(seconds=k)))
 
         self.truth = truth
+
         return self._get_obs(), {}
 
     def step(self, action_dict):
@@ -91,7 +92,7 @@ class TrackingEnv(gymnasium.Env):
 
         sim = Simulation(range, velocity, torch.normal(0, 1, range.shape) + 1j * torch.normal(0, 1, range.shape))
         detection = sim.detect(action_dict)
-        self.snrs.append(float(sim.snr))
+        self.snrs.append(sim.snr)
         doppler_resolution = sim.doppler_resolution
         self.resolutions.append(doppler_resolution)
 
@@ -119,12 +120,12 @@ class TrackingEnv(gymnasium.Env):
             return obs
         obs = self.actions[-1]
         obs['target_res'] = self.target_resolution
-        obs['SNR'] = np.asarray(self.snrs[-1])
+        obs['SNR'] = np.array([self.snrs[-1]], dtype=np.float32)
         if len(self.measurements) > 0:
             obs['measurement'] = np.asarray(self.measurements[-1][0], dtype=np.float64)
         else:
             obs['measurement'] = np.array([0, 0], dtype=np.float64)
-        # print(obs)
+        # print("obs ", obs)
         return obs
 
     def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
