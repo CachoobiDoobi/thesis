@@ -56,13 +56,11 @@ def make_scene(amplitudes, ranges, velocities, max_unamb_range, max_unamb_vel, n
 
 def fft(signal, nfft: int = None, dim: int = -1):
     data = signal.data
-    nfft = nfft if nfft else 2 * num_samples - 1
     return torch.fft.fft(input=data, n=nfft, dim=dim, norm='ortho')
 
 
 def ifft(signal, nfft: int = None, dim: int = -1):
     data = signal.data
-    nfft = nfft if nfft else 2 * num_samples - 1
     return torch.fft.ifft(input=data, n=nfft, dim=dim, norm='ortho')
 
 
@@ -176,8 +174,9 @@ def merge_bursts(bursts: [torch.tensor], received: [torch.tensor], transmit_time
 
 # %%
 def SNR(signal, noise):
-    S = fft(signal)
-    N = fft(noise)
+    # S = fft(signal, dim=-1, nfft=signal)
+    S = signal
+    N = fft(noise, nfft=signal.shape[-1])
 
     snr = 20 * torch.log(torch.linalg.vector_norm(torch.conj(S) * S) / torch.linalg.vector_norm(torch.conj(S) * N))
     return snr

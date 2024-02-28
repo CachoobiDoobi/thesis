@@ -6,6 +6,7 @@ from gymnasium.spaces import Discrete
 from ray import tune, air, train
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
+from ray.tune.schedulers import ASHAScheduler
 
 from tracking_env import TrackingEnv
 
@@ -17,12 +18,8 @@ action_space = Dict(
     {'pulse_duration': Discrete(5, start=0), 'PRI': Discrete(5, start=0), 'n_pulses': Discrete(21, start=10)})
 observation_space = Dict(
     {'pulse_duration': Discrete(5, start=0), 'PRI': Discrete(5, start=0), 'n_pulses': Discrete(21, start=10),
-     'measurement': Box(low=np.array([-1e5, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64), 'target_res': Discrete(1, start=20)})
-# observation_space['measurement'] = Box(low=np.array([-1e5, -1e3]), high=np.array([1e5, 1e3]), dtype=np.int64)
-# obs = {'pulse_duration': 1, 'PRI': 2, 'n_pulses': 10, 'measurement': np.array([3444.98777458,   29.21468945], dtype=np.float64)}
-# print(observation_space.contains(obs), obs)
-# print(observation_space.sample())
-
+     'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64), 'target_res': Discrete(40, start=10), 'SNR': Box(-200, 200)})
+print(observation_space.contains({'PRI': 3, 'n_pulses': 18, 'pulse_duration': 0, 'target_res': 22, 'SNR': [46.988007], 'measurement': [1.60189427e+04, 1.39318194e+00]}))
 env_config = {
     "ts": 10,
     'agents': agents,
@@ -48,7 +45,7 @@ config = (
     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_cpus_per_worker=1, num_gpus=1)
+    .resources(num_cpus_per_worker=1, num_gpus=0)
     .training(train_batch_size=8, sgd_minibatch_size=4, num_sgd_iter=10)
     .environment(disable_env_checking=True)
 
@@ -56,10 +53,19 @@ config = (
 
 stop = {
     # "training_iteration": 1,
-    # "time_budget_s": 60
-    "episode_reward_mean": 9.0,
+    # "time_budget_s":
+    "episode_reward_mean": 0.9 * env_config["ts"],
     # "episodes_total": 1
 }
+
+asha_scheduler = ASHAScheduler(
+    time_attr='training_iteration',
+    metric='episode_reward_mean',
+    mode='max',
+    # grace_period=10,
+    # reduction_factor=3,
+    # brackets=1,
+)
 
 # algo = config.build()
 # result = algo.train()
@@ -70,7 +76,7 @@ results = tune.Tuner(
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1, checkpoint_config=train.CheckpointConfig(
         checkpoint_frequency=5, checkpoint_at_end=True)),
-    tune_config=tune.TuneConfig(metric="episode_reward_mean", mode='max'),
+    tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max',),
 ).fit()
 
 best_result = results.get_best_result()
@@ -96,7 +102,7 @@ truncated = False
 
 while not truncated:
     parameters = agent.compute_single_action(obs)
-    print(parameters)
+    print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
     obs, reward, _, truncated, _ = env.step(parameters)
 
 env.render()

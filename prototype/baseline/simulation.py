@@ -11,6 +11,7 @@ from sklearn.cluster import DBSCAN
 from pyapril import caCfar
 import time
 from config import param_dict
+from prototype.utils import SNR
 
 
 class Simulation:
@@ -21,6 +22,7 @@ class Simulation:
         self.max_unamb_range = 0
         self.max_unamb_velocity = 0
         self.doppler_resolution = 0
+        self.snr = None
 
     def detect(self, parameters):
 
@@ -55,47 +57,26 @@ class Simulation:
         nfft_range = 2 * signal.shape[1] - 1
         nfft_doppler = 1024
 
-        # TODO what about pulse length
-        self.doppler_resolution = self.max_unamb_velocity / n_pulses
-
-        # print(self.doppler_resolution)
+        # in m/s
+        self.doppler_resolution = c / (2 * n_pulses * pri * fc)
 
         scene = self.make_scene(self.amplitudes, self.ranges, self.velocities, max_unamb_range, max_unamb_vel,
                                 nfft_range, nfft_doppler)
-
-        coherent_gain = int(np.ceil(pulse_duration * fs)) * signal.shape[-2]
-
-        # coherent_gain_db = 20 * torch.log10(torch.Tensor([coherent_gain]))
 
         X = self.simulate_target_with_scene_profile(signal, scene, num_pulses=n_pulses)
         image = self.doppler_processing(signal, X, nfft_range, nfft_doppler)
 
         detections = self.CFAR(image=image, max_unamb_range=max_unamb_range, max_unamb_vel=max_unamb_vel,
                                nfft_doppler=nfft_doppler, nfft_range=nfft_range)
-        # detections = self.cfar_april(image, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range)
-        # print("--- %s seconds ---" % (time.time() - start_time))
+
         return detections[0] if len(detections) > 0 else []
 
-    # def cfar_april(self, x, max_unamb_range, max_unamb_vel, nfft_doppler, nfft_range):
-    #     r_res = max_unamb_range / nfft_range
-    #     v_res = max_unamb_vel / nfft_doppler
-    #     k_width = int(np.ceil(r_res * 8))
-    #     k_height = int(np.ceil(v_res * 18))
-    #     inner_width = k_width // 2
-    #     inner_height = k_height // 2
-    #
-    #     x = x.squeeze(0)
-    #     print("starting detection")
-    #     cfar = CA_CFAR([k_height, k_width, inner_height, inner_width], 22, x.shape)
-    #     detection = cfar(x)
-    #     print(detection)
-    #     return detection
 
     def CFAR(self, image, max_unamb_range, max_unamb_vel, nfft_range, nfft_doppler, alpha=5, plot=False):
         image = image.reshape(1, 1, nfft_doppler, nfft_range)
         noise = torch.normal(0, 1000, image.shape)
-        # SINR = SNR(image, noise)
-
+        SINR = SNR(image, noise)
+        self.snr = SINR
         # print(f'SINR: {SINR}')
         image = torch.abs(image + noise)
         # create kernel
