@@ -108,7 +108,7 @@ def pulse(bandwidth, pulse_duration, num_samples, fs, delay=0):
 
 # %%
 def resolve_range_ambiguity(iterations: int, apparent_ranges, apparent_velocities, max_unamb_ranges,
-                            max_unamb_velocities):
+                            max_unamb_velocities, plot=False):
     n_bursts = len(apparent_ranges)
     points = torch.zeros((n_bursts, iterations ** 2, 2))
 
@@ -124,12 +124,12 @@ def resolve_range_ambiguity(iterations: int, apparent_ranges, apparent_velocitie
         cart_prod = torch.cartesian_prod(torch.tensor(ranges), torch.tensor(vels))
         points[n, :] = cart_prod
     points = points.reshape(-1, 2)
-    plt.scatter(points[:, 0], points[:, 1])
-    plt.show()
+    if plot:
+        plt.scatter(points[:, 0], points[:, 1])
+        plt.show()
     nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(points)
     distances, indices = nbrs.kneighbors(points)
     # remove itself from neighbor
-    indices = indices[:, 1]
     distances = distances[:, 1]
     smallest = np.argmin(distances)
     return points[smallest]
