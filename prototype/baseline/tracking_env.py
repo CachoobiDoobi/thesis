@@ -3,18 +3,17 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Optional
 
-from scipy.constants import c
-
-from config import param_dict
 import gymnasium
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from ray.rllib.utils.typing import MultiAgentDict, MultiEnvDict
+from scipy.constants import c
 from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, \
     ConstantVelocity
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
+from config import param_dict
 from simulation import Simulation
 
 
@@ -44,7 +43,7 @@ class TrackingEnv(gymnasium.Env):
 
         self.snrs = []
 
-        self.target_resolution =  np.random.choice(np.arange(20, 40))
+        self.target_resolution = np.random.choice(np.arange(20, 40))
 
         self.resolutions = []
 
@@ -166,7 +165,7 @@ class TrackingEnv(gymnasium.Env):
                     reward = 0
         # print(reward, (1 - (abs(self.target_resolution - doppler_resolution) / self.target_resolution)))
         # the nuber by which you divide in the exponential changes the width of the curve around the target resolution
-        reward = 0.5 * reward + 0.5 * np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100)
+        reward = (1 - self.timesteps / self.timestep_limit) * np.clip(reward, a_min=0, a_max=1) + (self.timesteps / self.timestep_limit) * np.clip(np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100), a_min=0, a_max=1.0)
         return reward
 
     def render(self):
@@ -176,8 +175,6 @@ class TrackingEnv(gymnasium.Env):
 
         ground_truth = np.asarray(ground_truth)
         measurements = np.asarray(self.measurements)[:, 0, :]
-
-        # TODO make a grid of plots
 
         fig, ax = plt.subplots(nrows=2, ncols=2)
 

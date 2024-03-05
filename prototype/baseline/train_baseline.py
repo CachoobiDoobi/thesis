@@ -21,7 +21,7 @@ observation_space = Dict(
      'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64), 'target_res': Discrete(40, start=10), 'SNR': Box(-200, 200)})
 print(observation_space.contains({'PRI': 3, 'n_pulses': 18, 'pulse_duration': 0, 'target_res': 22, 'SNR': [46.988007], 'measurement': [1.60189427e+04, 1.39318194e+00]}))
 env_config = {
-    "ts": 10,
+    "ts": 20,
     'agents': agents,
     # Actions -> [pulse_duration, n_pulses, bandwidth, PRF]
     'action_space': action_space,
@@ -54,7 +54,7 @@ config = (
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    "episode_reward_mean": 0.9 * env_config["ts"],
+    "episode_reward_mean": 0.95 * env_config["ts"],
     # "episodes_total": 1
 }
 
