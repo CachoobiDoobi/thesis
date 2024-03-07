@@ -15,12 +15,12 @@ agents = ['baseline']
 # pulse duration -> 10 - 50 us
 # pRI - prime would be nice, [2,4] kHz
 action_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0 , 0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0 ,0, 0]),
+    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10])})
 observation_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0 ,0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0 ,0, 0]),
+    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10]),
-     'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e6, 1e3]), dtype=np.float64),
+     'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64),
      'target_res': Discrete(40, start=10), 'SNR': Box(-200, 200, dtype=np.float32)})
 
 env_config = {

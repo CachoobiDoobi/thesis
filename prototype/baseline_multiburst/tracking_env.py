@@ -91,12 +91,13 @@ class TrackingEnv(gymnasium.Env):
 
         sim = Simulation(range, velocity, torch.normal(0, 1, range.shape) + 1j * torch.normal(0, 1, range.shape))
         detection = sim.detect(action_dict)
-        print(detection)
+
         self.snrs.append(sim.snr)
         doppler_resolution = sim.doppler_resolution
         self.resolutions.append(doppler_resolution)
 
-        if np.count_nonzero(detection) != 0:
+        # check if empty or outside range (ambiguity detection does that some time)
+        if np.count_nonzero(detection) != 0 and not (detection[0] > 1e5 or abs(detection[1]) > 1e3):
             self.measurements.append(detection)
 
         # Determine rewards
@@ -162,9 +163,9 @@ class TrackingEnv(gymnasium.Env):
                     reward += 1 - np.linalg.norm(t - p) / max_dist
                 else:
                     reward = 0
-        # print(reward, (1 - (abs(self.target_resolution - doppler_resolution) / self.target_resolution)))
         # the nuber by which you divide in the exponential changes the width of the curve around the target resolution
-        reward = 0.5 * reward + 0.5 * np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100)
+        reward = (1 - self.timesteps / self.timestep_limit) * reward + (self.timesteps / self.timestep_limit) * np.clip(
+            np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100), a_min=0, a_max=1)
         return reward
 
     def render(self):
@@ -175,20 +176,26 @@ class TrackingEnv(gymnasium.Env):
         ground_truth = np.asarray(ground_truth)
         measurements = np.asarray(self.measurements)
 
+        filtered_measurements = remove_outliers(measurements)
+
         fig, ax = plt.subplots(nrows=2, ncols=2)
 
-        ax[0, 0].scatter(ground_truth[:, 0], ground_truth[:, 1], label='Truth')
-        ax[0, 0].scatter(measurements[:, 0], measurements[:, 1], label='Measured')
+        ax[0, 0].scatter(ground_truth[:, 0], ground_truth[:, 1], label='Truth', c=np.arange(len(ground_truth)),
+                         cmap='viridis')
+        ax[0, 0].scatter(filtered_measurements[:, 0], filtered_measurements[:, 1], label='Measured', marker='x',
+                         c=np.arange(len(filtered_measurements)), cmap='viridis')
         ax[0, 0].legend()
         ax[0, 0].set_xlabel("Range")
         ax[0, 0].set_ylabel("Velocity")
         ax[0, 0].set_title("Tracking Simulation")
         # plt.show()
 
-        durations = np.asarray(
-            [np.prod(action['n_pulses']) * np.prod([param_dict['PRI'][pri] for pri in action["PRI"]]) for action in
-             self.actions])
-        min_duration = 2 * 1e9 * self.target_resolution / c
+        pris = np.array([param_dict['PRI'][pri] for action in self.actions for pri in action["PRI"]]).reshape(-1, 3)
+        n_pulses = np.array([action['n_pulses'] for action in self.actions]).reshape(-1, 3)
+        durations = pris * n_pulses
+        durations = np.sum(durations, axis=1)
+        min_duration = 1 / (2 * 1e9 * self.target_resolution / c)
+
         ax[0, 1].plot(np.arange(0, ground_truth.shape[0]), durations / min_duration)
         ax[0, 1].set_xlabel("Time")
         ax[0, 1].set_ylabel("Waveform duration ratio")
@@ -229,3 +236,29 @@ def find_closest_pairs(array1, array2):
     closest_pairs = [(a1[i], a2[min_indices[i]]) for i in range(len(a1))]
 
     return closest_pairs
+
+
+def remove_outliers(data, k=1.5):
+    """
+    Remove outliers from a 2D numpy array based on the IQR method.
+
+    Parameters:
+    - data: 2D numpy array where each row is a point [x, y].
+    - k: Multiplier for the IQR. Defaults to 1.5.
+
+    Returns:
+    - A 2D numpy array with outliers removed.
+    """
+    # Initialize a mask for all data points, starting with all set to True
+    mask = np.ones(data.shape[0], dtype=bool)
+
+    for i in range(data.shape[1]):  # Iterate over columns (dimensions)
+        # Calculate Q1 and Q3
+        Q1 = np.percentile(data[:, i], 25)
+        Q3 = np.percentile(data[:, i], 75)
+        # Calculate IQR
+        IQR = Q3 - Q1
+        # Update the mask to exclude outliers
+        mask &= (data[:, i] >= Q1 - k * IQR) & (data[:, i] <= Q3 + k * IQR)
+
+    return data[mask]
