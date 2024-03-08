@@ -1,17 +1,12 @@
-import math
-
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from numpy import pi
-from pyapril.caCfar import CA_CFAR
 from scipy.constants import c
 from torch import Tensor
 from sklearn.cluster import DBSCAN
-from pyapril import caCfar
-import time
 from config import param_dict
-from prototype.utils import SNR
+from prototype.prototype.utils import SNR
 
 
 class Simulation:

@@ -12,7 +12,7 @@ from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionM
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
 from config import param_dict
-from prototype.utils import generate_waveform, make_scene, simulate_target_with_scene_profile, doppler_processing, CFAR
+from prototype.prototype.utils import generate_waveform, make_scene, simulate_target_with_scene_profile, doppler_processing, CFAR
 
 
 def reward(truth, prediction, max_ua_range, max_ua_velocity):

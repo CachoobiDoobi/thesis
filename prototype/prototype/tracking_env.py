@@ -12,7 +12,7 @@ from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionM
     ConstantVelocity
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
-from prototype.simulation import Simulation
+from prototype.prototype.simulation import Simulation
 
 
 class MultiAgentTrackingEnv(MultiAgentEnv):

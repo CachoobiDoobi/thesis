@@ -48,7 +48,7 @@ config = (
     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_cpus_per_worker=1, num_gpus=1)
+    .resources(num_cpus_per_worker=1, num_gpus=0)
     .training(train_batch_size=8, sgd_minibatch_size=4, num_sgd_iter=10)
     .environment(disable_env_checking=True)
 
@@ -57,7 +57,7 @@ config = (
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    "episode_reward_mean": 0.9 * env_config["ts"],
+    "episode_reward_mean": 1.1 * env_config["ts"],
     # "episodes_total": 1
 }
 

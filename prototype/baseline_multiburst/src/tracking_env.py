@@ -35,7 +35,7 @@ class TrackingEnv(gymnasium.Env):
         # Should be none or define some default?
         # self._agent_ids = env_config.get("agents", None)
 
-        self.rewards = 0
+        self.episode_reward = 0
 
         self.actions = []
 
@@ -53,7 +53,7 @@ class TrackingEnv(gymnasium.Env):
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
         # reset rewards
-        self.rewards = 0
+        self.episode_reward = 0
         # reset current timestep
         self.timesteps = 0
 
@@ -106,6 +106,9 @@ class TrackingEnv(gymnasium.Env):
         max_ua_range, max_ua_velocity = sim.get_max_unambigous()
         rewards = self.reward(np.dstack((range.numpy(), velocity.numpy()))[0], detection,
                               max_ua_range, max_ua_velocity, doppler_resolution)
+
+        self.episode_reward += rewards
+
         truncated = self.timesteps >= self.timestep_limit
         terminated = False
 
@@ -156,19 +159,31 @@ class TrackingEnv(gymnasium.Env):
     def reward(self, truth, prediction, max_ua_range, max_ua_velocity, doppler_resolution):
         max_dist = math.dist([-max_ua_range, -max_ua_velocity], [max_ua_range, max_ua_velocity])
         reward = 0
-        # print("truth ", truth)
-        # print("prediction ", prediction)
-        for t in truth:
-            for p in prediction:
-                # map to distances to 0 1 range ( a reward of 0 for max distance and 1 for 0 distance) could be non linear scale to not let it gamify
-                if p.size != 0:
-                    reward += 1 - np.linalg.norm(t - p) / max_dist
-                else:
-                    reward = 0
-        # the nuber by which you divide in the exponential changes the width of the curve around the target resolution
-        reward = (1 - self.timesteps / self.timestep_limit) * reward + (self.timesteps / self.timestep_limit) * np.clip(
-            np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100), a_min=0, a_max=1)
+        prediction = np.array(prediction)
+        # single target
+        truth = truth[0]
+        # map to distances to 0 1 range ( a reward of 0 for max distance and 1 for 0 distance) could be non linear scale to not let it gamify
+        if prediction.any():
+            reward += 1 - np.linalg.norm(truth - prediction) / max_dist
+        else:
+            reward = 0
+        # gate reward
+        if self.episode_reward >= 5:
+            # if more than a certain amount of targets found in this episode, the agent can earn extra reward by minimizing the waveform duration
+            reward += np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100)
         return reward
+
+    def interpolate_reward(self, doppler_resolution, reward):
+        # the number by which you divide in the exponential changes the width of the curve around the target resolution
+        return (1.0 - self.timesteps / self.timestep_limit) * reward + (self.timesteps / self.timestep_limit) * np.exp(
+            -((doppler_resolution - self.target_resolution) ** 2) / 100)
+
+    def weighted_reward(self, doppler_resolution, reward, weights=None):
+        if weights is None:
+            weights = [0.5, 0.5]
+        assert np.sum(weights) == 1.0
+        return weights[0] * reward + weights[1] * np.exp(
+            -((doppler_resolution - self.target_resolution) ** 2) / 100)
 
     def render(self):
         ground_truth = []
@@ -184,7 +199,7 @@ class TrackingEnv(gymnasium.Env):
 
         # TODO makes this a line plot and add arrows
 
-        ax[0, 0].plot(ground_truth[:, 0], ground_truth[:, 1], label='Truth',)
+        ax[0, 0].plot(ground_truth[:, 0], ground_truth[:, 1], label='Truth', )
         ax[0, 0].scatter(filtered_measurements[:, 0], filtered_measurements[:, 1], label='Measured', marker='x',
                          c=np.arange(len(filtered_measurements)), cmap='viridis')
 
@@ -197,8 +212,8 @@ class TrackingEnv(gymnasium.Env):
             dy = end_point[1] - start_point[1]
 
             # Add the arrow
-            ax[0,0].arrow(start_point[0], start_point[1], dx, dy, shape='full', lw=0, length_includes_head=True,
-                      head_width=0.2, head_length=0.3,  color='red')
+            ax[0, 0].arrow(start_point[0], start_point[1], dx, dy, shape='full', lw=0, length_includes_head=True,
+                           head_width=0.2, head_length=0.3, color='red')
 
         ax[0, 0].legend()
         ax[0, 0].set_xlabel("Range")
@@ -241,7 +256,8 @@ class TrackingEnv(gymnasium.Env):
         fig = go.Figure(
             data=[
                 go.Scatter(x=ground_truth[:, 0], y=ground_truth[:, 1], mode='lines+markers', name='True Position'),
-                go.Scatter(x=filtered_measurements[:, 0], y=filtered_measurements[:, 1], mode='markers', name='Measurements')],
+                go.Scatter(x=filtered_measurements[:, 0], y=filtered_measurements[:, 1], mode='markers',
+                           name='Measurements')],
             layout=go.Layout(
                 updatemenus=[dict(
                     type="buttons",
