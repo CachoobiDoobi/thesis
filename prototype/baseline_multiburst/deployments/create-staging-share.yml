@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   # namespace-mountname
-  name: jacobss-python-examples-rtkubtemp
+  name: gaghir-thesis-rtkubtemp
 spec:
   capacity:
     storage: 100Gi
@@ -24,13 +24,13 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   # namespace-mountname-claim
-  name: jacobss-python-examples-rtkubtemp-claim
-  namespace: jacobss-python-examples
+  name: gaghir-thesis-rtkubtemp-claim
+  namespace: gaghir-thesis
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 100Gi
-  volumeName: jacobss-python-examples-rtkubtemp
+  volumeName: gaghir-thesis-rtkubtemp
   storageClassName: ''

@@ -11,6 +11,24 @@ from ray.tune.schedulers import ASHAScheduler
 
 from tracking_env import TrackingEnv
 
+import os
+
+def create_empty_file_in_current_directory(file_name):
+    try:
+        current_directory = os.getcwd()  # Get the current working directory
+        file_path = os.path.join(current_directory, file_name)  # Create the full file path
+        with open(file_path, 'w') as f:
+            pass  # Writing nothing to create an empty file
+        print(f"Empty file '{file_name}' created successfully in the current directory.")
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+# Usage example:
+file_name = 'empty_file.txt'  # Provide the name for the empty file
+create_empty_file_in_current_directory(file_name)
+
+sys.exit()
+
 agents = ['baseline']
 
 # pulse duration -> 10 - 50 us

@@ -12,9 +12,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       volumes:
-      - name: gaghir-thesis-tmp
+      - name: gaghir-thesis-rtkubtemp
         persistentVolumeClaim:
-          claimName: gaghir-thesis-tmp-claim
+          claimName: gaghir-thesis-rtkubtemp-claim
       containers:
       - name: thesis
         image: gitlab.tsn.tno.nl:4567/radartechnologie/k8s-ref/python-infra/env:0.4.0-python3.9.9-cuda
@@ -26,7 +26,8 @@ spec:
                 --branch master
                 --single-branch
                 project;
-            cp -r tsn.tno.nl/RA-Data/Express/rtkubtemp_unix/Radu
+            cd project;
+            cp -r hypmc_results tsn.tno.nl/RA-Data/Express/rtkubtemp_unix/Radu;
             trap : TERM INT; sleep infinity & wait;"
 #           - "git clone https://tsn-rt-k8s-ref-python-app-rep-ro:uNbMdPb4EoLZwXPJRmRv@gitlab.tsn.tno.nl/radartechnologie/k8s-ref/python-app.git
 #                 --branch master
@@ -46,7 +47,7 @@ spec:
             nvidia.com/gpu: '1'
         volumeMounts:
         - mountPath: /nas-tmp
-          name: gaghir-thesis-tmp
+          name: gaghir-thesis-rtkubtemp
       restartPolicy: Never
       # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
       imagePullSecrets:
