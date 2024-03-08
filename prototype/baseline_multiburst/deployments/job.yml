@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+
+# https://kubernetes.io/docs/concepts/workloads/controllers/job/
+kind: Job
+metadata:
+  name: train-baseline
+  namespace: gaghir-thesis-examples
+spec:
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 4
+  template:
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+      - name: gaghir-thesis-rtkubtemp
+        persistentVolumeClaim:
+          claimName: gaghir-thesis-rtkubtemp-claim
+      containers:
+      - name: train-baseline
+        image: gitlab.tsn.tno.nl:4567/radartechnologie/k8s-ref/python-infra/env:0.4.0-python3.9.9-cuda
+        command:
+          - /bin/bash
+        args:
+          - -c
+          - "git clone https://tsn-rt-k8s-ref-python-app-rep-rw:glpat-89p399JDULtDXEQKEWYb@gitlab.tsn.tno.nl/radartechnologie/k8s-ref/python-app.git
+                --branch master
+                --single-branch
+                project;
+            trap : TERM INT; sleep infinity & wait;"
+#           - "git clone https://tsn-rt-k8s-ref-python-app-rep-ro:uNbMdPb4EoLZwXPJRmRv@gitlab.tsn.tno.nl/radartechnologie/k8s-ref/python-app.git
+#                 --branch master
+#                 --single-branch
+#                 project;
+#             trap : TERM INT; sleep infinity & wait;"
+#             poetry run python project/src/main.py;
+        resources:
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          limits:
+            cpu: '1'
+            memory: 8Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '1'
+            memory: 8Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /nas-tmp
+          name: gaghir-thesis-rtkubtemp
+      restartPolicy: Never
+      # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      imagePullSecrets:
+      - name: tsn-rt-k8s-ref-python-infra

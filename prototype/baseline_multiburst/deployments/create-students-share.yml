@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  # namespace-mountname
+  name: gaghir-thesis-students
+spec:
+  capacity:
+    storage: 100Gi
+  nfs:
+    server: fs-radar01.tsn.tno.nl
+    path: /volume3/students
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=3
+    - tcp
+    - ro
+    - async
+    - rsize=32768
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  # namespace-mountname-claim
+  name: gaghir-thesis-students-claim
+  namespace: gaghir-thesis
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: gaghir-thesis-students
+  storageClassName: ''

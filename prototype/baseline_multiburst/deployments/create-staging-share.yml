@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  # namespace-mountname
+  name: jacobss-python-examples-rtkubtemp
+spec:
+  capacity:
+    storage: 100Gi
+  nfs:
+    server: fsv-ra21-27.tsn.tno.nl
+    path: /ra_express_rtkubtemp
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=3
+    - tcp
+    - rw
+    - async
+    - rsize=32768
+    - wsize=32768
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  # namespace-mountname-claim
+  name: jacobss-python-examples-rtkubtemp-claim
+  namespace: jacobss-python-examples
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: jacobss-python-examples-rtkubtemp
+  storageClassName: ''
