@@ -1,4 +1,5 @@
 import pprint
+import sys
 
 import numpy as np
 from gymnasium.spaces import Dict, Box, MultiDiscrete
@@ -9,6 +10,10 @@ from ray.rllib.policy.policy import PolicySpec
 from ray.tune.schedulers import ASHAScheduler
 
 from tracking_env import TrackingEnv
+
+
+print('cheese')
+sys.exit()
 
 agents = ['baseline']
 
