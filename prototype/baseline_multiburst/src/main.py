@@ -11,10 +11,6 @@ from ray.tune.schedulers import ASHAScheduler
 
 from tracking_env import TrackingEnv
 
-
-print('cheese')
-sys.exit()
-
 agents = ['baseline']
 
 # pulse duration -> 10 - 50 us
