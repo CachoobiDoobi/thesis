@@ -15,6 +15,8 @@ from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
 from config import param_dict
 from simulation import Simulation
+from matplotlib.animation import FuncAnimation
+import plotly.graph_objects as go
 
 
 class TrackingEnv(gymnasium.Env):
@@ -180,10 +182,24 @@ class TrackingEnv(gymnasium.Env):
 
         fig, ax = plt.subplots(nrows=2, ncols=2)
 
-        ax[0, 0].scatter(ground_truth[:, 0], ground_truth[:, 1], label='Truth', c=np.arange(len(ground_truth)),
-                         cmap='viridis')
+        # TODO makes this a line plot and add arrows
+
+        ax[0, 0].plot(ground_truth[:, 0], ground_truth[:, 1], label='Truth',)
         ax[0, 0].scatter(filtered_measurements[:, 0], filtered_measurements[:, 1], label='Measured', marker='x',
                          c=np.arange(len(filtered_measurements)), cmap='viridis')
+
+        for i in range(len(filtered_measurements) - 1):
+            start_point = filtered_measurements[i]
+            end_point = filtered_measurements[i + 1]
+
+            # Calculate the change in x and y direction
+            dx = end_point[0] - start_point[0]
+            dy = end_point[1] - start_point[1]
+
+            # Add the arrow
+            ax[0,0].arrow(start_point[0], start_point[1], dx, dy, shape='full', lw=0, length_includes_head=True,
+                      head_width=0.2, head_length=0.3,  color='red')
+
         ax[0, 0].legend()
         ax[0, 0].set_xlabel("Range")
         ax[0, 0].set_ylabel("Velocity")
@@ -211,13 +227,39 @@ class TrackingEnv(gymnasium.Env):
         ax[1, 0].set_title("Error")
         # plt.show()
 
-        ax[1, 1].plot(self.snrs)
+        ax[1, 1].plot(np.arange(len(self.snrs)), self.snrs)
         ax[1, 1].set_xlabel("Time")
         ax[1, 1].set_ylabel("SNR")
         ax[1, 1].set_title("SNR")
 
-        fig.tight_layout()
+        plt.legend()
         plt.show()
+
+        # TODO Add an animation
+
+        # Create figure
+        fig = go.Figure(
+            data=[
+                go.Scatter(x=ground_truth[:, 0], y=ground_truth[:, 1], mode='lines+markers', name='True Position'),
+                go.Scatter(x=filtered_measurements[:, 0], y=filtered_measurements[:, 1], mode='markers', name='Measurements')],
+            layout=go.Layout(
+                updatemenus=[dict(
+                    type="buttons",
+                    buttons=[dict(label="Play",
+                                  method="animate",
+                                  args=[None, {"frame": {"duration": 500, "redraw": True}, "fromcurrent": True}])])]
+            ),
+            frames=[go.Frame(
+                data=[go.Scatter(x=ground_truth[:k + 1, 0], y=ground_truth[:k + 1, 1]),
+                      go.Scatter(x=filtered_measurements[:k + 1, 0], y=filtered_measurements[:k + 1, 1])]
+            ) for k in range(ground_truth.shape[0])]
+        )
+
+        # Layout settings
+        fig.update_layout(title='True Positions and Measurements Animation', xaxis=dict(range=[0, 10]),
+                          yaxis=dict(range=[0, 5]))
+
+        fig.show()
 
 
 def find_closest_pairs(array1, array2):
