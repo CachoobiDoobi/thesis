@@ -27,14 +27,9 @@ spec:
                 --single-branch
                 project;
             cd project;
-            cp -r hypmc_results tsn.tno.nl/RA-Data/Express/rtkubtemp_unix/Radu;
+            poetry run python prototype/baseline_multiburst/src/main.py;
+            cp -r  prototype/baseline_multiburst/src/results/foo.txt /ra_express_rtkubtemp/Radu/results;
             trap : TERM INT; sleep infinity & wait;"
-#           - "git clone https://tsn-rt-k8s-ref-python-app-rep-ro:uNbMdPb4EoLZwXPJRmRv@gitlab.tsn.tno.nl/radartechnologie/k8s-ref/python-app.git
-#                 --branch master
-#                 --single-branch
-#                 project;
-#             trap : TERM INT; sleep infinity & wait;"
-#             poetry run python project/src/main.py;
         resources:
           # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
           limits:
