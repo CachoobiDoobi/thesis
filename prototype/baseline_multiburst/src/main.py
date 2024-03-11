@@ -13,21 +13,14 @@ from tracking_env import TrackingEnv
 
 import os
 
-def create_empty_file_in_current_directory(file_name):
-    try:
-        current_directory = os.getcwd()  # Get the current working directory
-        file_path = os.path.join(current_directory, file_name)  # Create the full file path
-        with open(file_path, 'w') as f:
-            pass  # Writing nothing to create an empty file
-        print(f"Empty file '{file_name}' created successfully in the current directory.")
-    except Exception as e:
-        print(f"Error occurred: {e}")
 
-# Usage example:
-file_name = 'empty_file.txt'  # Provide the name for the empty file
-create_empty_file_in_current_directory(file_name)
-
+filename = "results/foo.txt"
+os.makedirs(os.path.dirname(filename), exist_ok=True)
+with open(filename, "w") as f:
+    f.write("FOOBAR")
+f.close()
 sys.exit()
+
 
 agents = ['baseline']
 
@@ -92,7 +85,7 @@ asha_scheduler = ASHAScheduler(
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1, checkpoint_config=train.CheckpointConfig(
+    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="./results", name="test_experiment", checkpoint_config=train.CheckpointConfig(
         checkpoint_frequency=5, checkpoint_at_end=True)),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
 ).fit()
