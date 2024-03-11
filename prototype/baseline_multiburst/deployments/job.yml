@@ -22,10 +22,11 @@ spec:
           - /bin/bash
         args:
           - -c
-          - "git clone https://tsn-rt-k8s-ref-python-app-rep-rw:glpat-89p399JDULtDXEQKEWYb@gitlab.tsn.tno.nl/radartechnologie/k8s-ref/python-app.git
-                --branch master
+          - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
+                --branch main
                 --single-branch
                 project;
+            pyenv install 3.9.0
             cd project;
             poetry run python prototype/baseline_multiburst/src/main.py;
             cp -r  prototype/baseline_multiburst/src/results/foo.txt /ra_express_rtkubtemp/Radu/results;
