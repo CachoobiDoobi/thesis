@@ -28,8 +28,8 @@ spec:
                 project;
             pyenv install 3.9.0
             cd project;
-            poetry run python prototype/baseline_multiburst/src/main.py;
-            cp -r  prototype/baseline_multiburst/src/results/foo.txt /ra_express_rtkubtemp/Radu/results;
+            poetry run python project/prototype/baseline_multiburst/src/main.py;
+            cp -r  project/prototype/baseline_multiburst/src/results/foo.txt /ra_express_rtkubtemp/Radu/results;
             trap : TERM INT; sleep infinity & wait;"
         resources:
           # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
