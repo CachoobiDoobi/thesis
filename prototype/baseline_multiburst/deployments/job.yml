@@ -26,10 +26,12 @@ spec:
                 --branch main
                 --single-branch
                 project;
+            poetry check;
             cd project/prototype/baseline_multiburst/src;
             poetry run python main.py;
-            cp -r  results/foo.txt /ra_express_rtkubtemp/Radu/results;
-            trap : TERM INT; sleep infinity & wait;"
+            cd;
+            cp -r  /project/prototype/baseline_multiburst/src/results /nas-tmp/Radu;"
+#            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;
@@ -37,12 +39,12 @@ spec:
         resources:
           # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
           limits:
-            cpu: '1'
-            memory: 8Gi
+            cpu: '50'
+            memory: 50Gi
             nvidia.com/gpu: '1'
           requests:
-            cpu: '1'
-            memory: 8Gi
+            cpu: '20'
+            memory: 20Gi
             nvidia.com/gpu: '1'
         volumeMounts:
         - mountPath: /nas-tmp
