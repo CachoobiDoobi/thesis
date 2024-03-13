@@ -17,7 +17,7 @@ spec:
           claimName: gaghir-thesis-rtkubtemp-claim
       containers:
       - name: thesis
-        image: gitlab.tsn.tno.nl:4567/radartechnologie/k8s-ref/python-infra/env:0.4.0-python3.9.9-cuda
+        image: gitlab.tsn.tno.nl:4567/gaghir/thesis:latest
         command:
           - /bin/bash
         args:
@@ -26,11 +26,14 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            pyenv install 3.9.0
-            cd project;
-            poetry run python project/prototype/baseline_multiburst/src/main.py;
-            cp -r  project/prototype/baseline_multiburst/src/results/foo.txt /ra_express_rtkubtemp/Radu/results;
+            cd project/prototype/baseline_multiburst/src;
+            poetry run python main.py;
+            cp -r  results/foo.txt /ra_express_rtkubtemp/Radu/results;
             trap : TERM INT; sleep infinity & wait;"
+          # pyenv install 3.9.0;
+          #            poetry self update;
+          #            poetry lock;
+          #            poetry install;
         resources:
           # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
           limits:
@@ -47,4 +50,4 @@ spec:
       restartPolicy: Never
       # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
       imagePullSecrets:
-      - name: kubers
+      - name: baseline-image
