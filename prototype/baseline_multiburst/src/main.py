@@ -1,6 +1,9 @@
 import pprint
 import sys
-
+import pandas
+import pyarrow
+import tree
+import skimage
 import numpy as np
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from gymnasium.spaces import Discrete

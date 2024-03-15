@@ -26,9 +26,8 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            poetry check;
             cd project/prototype/baseline_multiburst/src;
-            poetry run python main.py;
+            python main.py;
             cd;
             cp -r  /project/prototype/baseline_multiburst/src/results /nas-tmp/Radu;"
 #            trap : TERM INT; sleep infinity & wait;"
