@@ -42,8 +42,8 @@ spec:
             memory: 50Gi
             nvidia.com/gpu: '1'
           requests:
-            cpu: '20'
-            memory: 20Gi
+            cpu: '30'
+            memory: 30Gi
             nvidia.com/gpu: '1'
         volumeMounts:
         - mountPath: /nas-tmp

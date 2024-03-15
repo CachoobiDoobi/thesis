@@ -50,7 +50,7 @@ config = (
     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    # .resources(container_num_cpus= 50, num_gpus=1)
+    .resources(num_gpus=1)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
 
@@ -59,8 +59,8 @@ config = (
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    "episode_reward_mean": 1.1 * env_config["ts"],
-    "episodes_total": 1
+    "episode_reward_mean": 13,
+    # "episodes_total": 1
 }
 
 asha_scheduler = ASHAScheduler(
