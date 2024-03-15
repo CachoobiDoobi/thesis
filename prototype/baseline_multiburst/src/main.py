@@ -1,14 +1,9 @@
 import pprint
-import sys
-import pandas
-import pyarrow
-import tree
-import skimage
+
 import numpy as np
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from gymnasium.spaces import Discrete
 from ray import tune, air, train
-from ray.dashboard.k8s_utils import container_num_cpus
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 from ray.tune.schedulers import ASHAScheduler
@@ -20,10 +15,12 @@ agents = ['baseline']
 # pulse duration -> 10 - 50 us
 # pRI - prime would be nice, [2,4] kHz
 action_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
+    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
+     'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10])})
 observation_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]), 'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
+    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
+     'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10]),
      'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64),
      'target_res': Discrete(40, start=10), 'SNR': Box(-200, 200, dtype=np.float32)})
@@ -54,7 +51,7 @@ config = (
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
     # .resources(container_num_cpus= 50, num_gpus=1)
-    .training(train_batch_size=512, sgd_minibatch_size=128,  num_sgd_iter=30)
+    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
 
 )
@@ -78,8 +75,9 @@ asha_scheduler = ASHAScheduler(
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="/project/prototype/baseline_multiburst/src/results", name="test_experiment", checkpoint_config=train.CheckpointConfig(
-        checkpoint_frequency=5, checkpoint_at_end=True)),
+    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="/project/prototype/baseline_multiburst/src/results",
+                             name="test_experiment", checkpoint_config=train.CheckpointConfig(
+            checkpoint_frequency=5, checkpoint_at_end=True)),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
 ).fit()
 
