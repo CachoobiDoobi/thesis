@@ -168,7 +168,7 @@ class TrackingEnv(gymnasium.Env):
         else:
             reward = 0
         # gate reward
-        if self.episode_reward >= 5:
+        if self.episode_reward >= 6.9:
             # if more than a certain amount of targets found in this episode, the agent can earn extra reward by minimizing the waveform duration
             reward += np.exp(-((doppler_resolution - self.target_resolution) ** 2) / 100)
         return reward
@@ -248,6 +248,7 @@ class TrackingEnv(gymnasium.Env):
         ax[1, 1].set_title("SNR")
 
         plt.legend()
+        plt.tight_layout()
         plt.savefig('results/results.pdf')
         plt.show()
 

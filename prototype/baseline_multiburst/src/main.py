@@ -59,8 +59,8 @@ config = (
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    # "episode_reward_mean": 13,
-    "episodes_total": 1
+    "episode_reward_mean": 12.5,
+    # "episodes_total": 1
 }
 
 asha_scheduler = ASHAScheduler(
@@ -71,11 +71,11 @@ asha_scheduler = ASHAScheduler(
     # reduction_factor=3,
     # brackets=1,
 )
-
+# can i write results directly to nas-tmp?
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="/project/prototype/baseline_multiburst/src/results",
+    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="/nas-tmp/Radu",
                              name="test_experiment", checkpoint_config=train.CheckpointConfig(
             checkpoint_frequency=5, checkpoint_at_end=True)),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
