@@ -248,6 +248,7 @@ class TrackingEnv(gymnasium.Env):
         ax[1, 1].set_title("SNR")
 
         plt.legend()
+        plt.savefig('results/results.pdf')
         plt.show()
 
         # TODO Add an animation

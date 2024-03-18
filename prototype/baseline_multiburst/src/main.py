@@ -59,8 +59,8 @@ config = (
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    "episode_reward_mean": 13,
-    # "episodes_total": 1
+    # "episode_reward_mean": 13,
+    "episodes_total": 1
 }
 
 asha_scheduler = ASHAScheduler(
@@ -101,6 +101,8 @@ env = TrackingEnv(env_config=config["env_config"])
 obs, _ = env.reset()
 
 truncated = False
+
+# TODO save plots
 
 while not truncated:
     parameters = agent.compute_single_action(obs)
