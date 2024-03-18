@@ -50,7 +50,7 @@ config = (
     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_gpus=1)
+    .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
 
@@ -106,7 +106,7 @@ truncated = False
 
 while not truncated:
     parameters = agent.compute_single_action(obs)
-    print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
+    # print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
     obs, reward, _, truncated, _ = env.step(parameters)
 
 env.render()
