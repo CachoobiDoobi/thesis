@@ -1,6 +1,7 @@
 import pprint
 
 import numpy as np
+import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from gymnasium.spaces import Discrete
 from ray import tune, air, train
@@ -22,8 +23,8 @@ observation_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10]),
-     'measurement': Box(low=np.array([0, -1e3]), high=np.array([1e5, 1e3]), dtype=np.float64),
-     'target_res': Discrete(40, start=10), 'SNR': Box(-200, 200, dtype=np.float32)})
+     'PD': Box(low=-1, high=1),
+     'ratio': Box(low=0, high=100)})
 
 env_config = {
     "ts": 10,
@@ -46,21 +47,30 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=20)
+    .rollouts(num_rollout_workers=3)
     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_gpus=1, num_cpus_per_worker=2)
-    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    .resources(num_gpus=0, num_cpus_per_worker=2)
+    .training(train_batch_size=32, sgd_minibatch_size=8, num_sgd_iter=10)
     .environment(disable_env_checking=True)
+    # config = (
+    #     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
+    #     .rollouts(num_rollout_workers=20)
+    #     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
+    #     .framework("torch")
+    #     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
+    #     .resources(num_gpus=1, num_cpus_per_worker=2)
+    #     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    #     .environment(disable_env_checking=True)
 
 )
 
 stop = {
     # "training_iteration": 1,
     # "time_budget_s":
-    "episode_reward_mean": 12.5,
-    # "episodes_total": 1
+    # "episode_reward_mean": 12.5,
+    "episodes_total": 5000
 }
 
 asha_scheduler = ASHAScheduler(
@@ -75,9 +85,9 @@ asha_scheduler = ASHAScheduler(
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1, storage_path="/nas-tmp/Radu",
-                             name="test_experiment", checkpoint_config=train.CheckpointConfig(
-            checkpoint_frequency=5, checkpoint_at_end=True)),
+    run_config=air.RunConfig(stop=stop, verbose=1, storage_path=r"C:\Users\gaghir\OneDrive - TNO\Repositories\thesis\prototype\baseline_multiburst\src\results",
+                             name="carpetsim", checkpoint_config=train.CheckpointConfig(
+            checkpoint_frequency=0, checkpoint_at_end=True)),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
 ).fit()
 
@@ -92,7 +102,6 @@ metrics_to_print = [
     "episode_reward_min",
 ]
 pprint.pprint({k: v for k, v in best_result.metrics.items() if k in metrics_to_print})
-
 agent = Algorithm.from_checkpoint(best_result.checkpoint)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
 
@@ -101,8 +110,6 @@ env = TrackingEnv(env_config=config["env_config"])
 obs, _ = env.reset()
 
 truncated = False
-
-# TODO save plots
 
 while not truncated:
     parameters = agent.compute_single_action(obs)

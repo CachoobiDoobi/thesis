@@ -1,4 +1,5 @@
 import numpy as np
+import ray
 from gymnasium.spaces import MultiDiscrete, Dict, Box, Discrete
 from ray.rllib.algorithms import Algorithm
 
@@ -23,8 +24,9 @@ env_config = {
     # observe actions of other agents, and previous measurement
     'observation_space': observation_space
 }
+ray.init(num_cpus=4, num_gpus=0)
 
-agent = Algorithm.from_checkpoint(r"C:\Users\gaghir\Downloads\results\results\test_experiment\PPO_TrackingEnv_0d586_00000_0_2024-03-15_02-04-38\checkpoint_000000")
+agent = Algorithm.from_checkpoint(r"results/2024-03-18_02-23-44/checkpoint_000000/")
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
 
 env = TrackingEnv(env_config=env_config)
