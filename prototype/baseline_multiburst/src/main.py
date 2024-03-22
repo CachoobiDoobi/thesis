@@ -52,7 +52,7 @@ config = (
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
     .resources(num_gpus=0, num_cpus_per_worker=2)
-    .training(train_batch_size=32, sgd_minibatch_size=8, num_sgd_iter=10)
+    .training(train_batch_size=tune.grid_search([128, 256, 512]), sgd_minibatch_size=tune.grid_search([32, 64]), num_sgd_iter=tune.grid_search([20, 30]))
     .environment(disable_env_checking=True)
     # config = (
     #     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
@@ -67,10 +67,10 @@ config = (
 )
 
 stop = {
-    # "training_iteration": 1,
+    "training_iteration": 100,
     # "time_budget_s":
-    # "episode_reward_mean": 12.5,
-    "episodes_total": 5000
+    # "episode_reward_mean": 10,
+    # "episodes_total": 900
 }
 
 asha_scheduler = ASHAScheduler(
@@ -85,18 +85,17 @@ asha_scheduler = ASHAScheduler(
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1, storage_path=r"C:\Users\gaghir\OneDrive - TNO\Repositories\thesis\prototype\baseline_multiburst\src\results",
+    run_config=air.RunConfig(stop=stop, verbose=1,
                              name="carpetsim", checkpoint_config=train.CheckpointConfig(
-            checkpoint_frequency=0, checkpoint_at_end=True)),
+            checkpoint_frequency=20, checkpoint_at_end=True)),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
 ).fit()
 
-best_result = results.get_best_result()
+best_result = results.get_best_result(metric='episode_reward_mean', mode='min', scope='all')
 
 print("\nBest performing trial's final reported metrics:\n")
 
 metrics_to_print = [
-    "episodes_total"
     "episode_reward_mean",
     "episode_reward_max",
     "episode_reward_min",
