@@ -21,6 +21,7 @@ from config import param_dict
 class MultiAgentTrackingEnv(MultiAgentEnv):
     def __init__(self, env_config=None):
         super().__init__()
+
         env_config = env_config or {}
 
         self.timestep_limit = env_config.get("ts", 10)
@@ -47,6 +48,10 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         self.ratios = []
 
+        self.range_uncertainty = None
+
+        self.velocity_uncertainty = None
+
         self.reset()
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
@@ -66,7 +71,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(np.random.uniform(100, 600))])
 
         # 1d model
-        truth = GroundTruthPath([GroundTruthState([np.random.uniform(1e4, 5e4), 1], timestamp=start_time)])
+        truth = GroundTruthPath([GroundTruthState([np.random.uniform(1e4, 5e4), 100], timestamp=start_time)])
 
         for k in range(1, self.timestep_limit):
             truth.append(GroundTruthState(
@@ -79,7 +84,6 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
     def step(self, action_dict):
         self.timesteps += 1
-        # TODO make this multiagent
         for agent in action_dict:
             parameters = action_dict[agent]
             parameters["pulse_duration"] = np.clip(parameters.get('pulse_duration'), a_min=0, a_max=5)
@@ -93,11 +97,22 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         velocity = torch.tensor([self.truth[self.timesteps - 1].state_vector[1]])
 
         sim = CarpetSimulation(ranges=range, velocities=velocity)
-        pds = sim.detect(action_dict)
+        pds, scnr = sim.detect(action_dict)
+
+        self.range_uncertainty = c / (2 * 1e6 * np.sqrt(2 * scnr))
+
+        duration = 0
+        for agent in self._agent_ids:
+            pris = [param_dict['PRI'][pri] for pri in action_dict[agent]["PRI"]]
+            n_pulses = action_dict[agent]['n_pulses']
+            durations = pris * n_pulses
+            duration += np.sum(durations)
+        wavelength = c / 3300000000
+        self.velocity_uncertainty = wavelength / (2 * duration * np.sqrt(2 * scnr))
 
         self.pds.append(pds)
 
-        rewards = {agent: self.reward(pds, action_dict) for agent in self._agent_ids}
+        rewards = self.reward(pds, action_dict)
         self.episode_reward += sum(rewards.values())
 
         terminateds = {"__all__": self.timesteps >= self.timestep_limit}
@@ -108,6 +123,16 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         return obs, rewards, terminateds, truncateds, info
 
     def _get_obs(self):
+        range = self.truth[max(0, self.timesteps - 1)].state_vector[0]
+        vel = self.truth[max(0, self.timesteps - 1)].state_vector[1]
+        r_hat = np.float32(np.random.normal(range, 50, size=(1,)) if self.timesteps == 0 else np.random.normal(range,
+                                                                                                               abs(range * self.range_uncertainty),
+                                                                                                               size=(
+                                                                                                               1,)))
+        v_hat = np.float32(np.random.normal(vel, 5, size=(1,)) if self.timesteps == 0 else np.random.normal(vel,
+                                                                                                            abs(vel * self.velocity_uncertainty),
+                                                                                                            size=(1,)))
+        # print(range, vel, r_hat, v_hat)
         # for now 2 agents
         one = self.agent_ids[0]
         two = self.agent_ids[1]
@@ -115,12 +140,16 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         obs = dict()
 
         obs[one] = self.actions[-1][two] if len(self.actions) > 0 else self.observation_space.sample()
+        obs[one]['r_hat'] = r_hat
+        obs[one]['v_hat'] = v_hat
         obs[one]['PD'] = np.array([self.pds[-1]], dtype=np.float32) if len(self.pds) > 0 else np.array([0],
                                                                                                        dtype=np.float32)
         obs[one]['ratio'] = np.array([self.ratios[-1]], dtype=np.float32) if len(self.ratios) > 0 else np.array([0],
                                                                                                                 dtype=np.float32)
 
         obs[two] = self.actions[-1][one] if len(self.actions) > 0 else self.observation_space.sample()
+        obs[two]['r_hat'] = r_hat
+        obs[two]['v_hat'] = v_hat
         obs[two]['PD'] = np.array([self.pds[-1]], dtype=np.float32) if len(self.pds) > 0 else np.array([0],
                                                                                                        dtype=np.float32)
         obs[two]['ratio'] = np.array([self.ratios[-1]], dtype=np.float32) if len(self.ratios) > 0 else np.array([0],
@@ -150,8 +179,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         return reduce(lambda n, m: n and m, [self.action_space.contains(o) for o in x.values()])
 
     def reward(self, pds, action_dict):
-        # TODO make this multiagent
-        reward = np.mean(pds)
+        reward_pd = np.mean(pds)
 
         duration = 0
         for agent in self._agent_ids:
@@ -163,14 +191,14 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         ratio = duration / min_duration
 
         self.ratios.append(ratio)
-        # gate reward
-        if self.episode_reward >= 6.9:
-            # if more than a certain amount of targets found in this episode, the agent can earn extra reward by minimizing the waveform duration
-            sigma = 0.25  # Adjust the width of the Gaussian curve
-            reward += math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
-        return reward
+
+        sigma = 0.25
+        reward_time = math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
+
+        return {0: reward_pd, 1: reward_time}
 
     def render(self):
+        # TODO also make a per agent plot
         # Create Plotly figure for the first plot (Probability of detection)
         fig1 = go.Figure()
         fig1.add_trace(

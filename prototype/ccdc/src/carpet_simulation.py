@@ -32,6 +32,7 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
 
+        # is this correct?
         carpet.Clutter_SurfaceClutter = True
         carpet.Propagation_WindDirection = np.pi
         # carpet.Surface
@@ -40,7 +41,8 @@ class CarpetSimulation:
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'
         carpet.Processing_Integrator = 'm out n'
-        # what is this
+        # what is this?
         carpet.Processing_M = 3
         pds = carpet.detection_probability(ranges=self.ranges, velocities=self.velocities, heights=alt)
-        return pds.reshape(-1)[0]
+        scnr = carpet.GetSCNR()
+        return pds.reshape(-1)[0], scnr

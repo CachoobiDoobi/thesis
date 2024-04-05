@@ -13,7 +13,7 @@ from ray.rllib.policy.policy import PolicySpec
 from ray.tune.schedulers import ASHAScheduler
 
 from prototype.ccdc.src.centralized_critic import CentralizedCritic
-from prototype.ccdc.src.critic import TorchCentralizedCriticModel, YetAnotherTorchCentralizedCriticModel
+from prototype.ccdc.src.critic import TorchCentralizedCriticModel
 from tracking_env import MultiAgentTrackingEnv
 
 # pulse duration -> 10 - 50 us
@@ -27,10 +27,13 @@ observation_space = Dict(
      'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10]),
      'PD': Box(low=-1, high=1),
-     'ratio': Box(low=0, high=100)})
+     'ratio': Box(low=0, high=100),
+     'r_hat': Box(low=0, high=1e5),
+     'v_hat': Box(low=0, high=1e3)
+     }
+)
 
 # action_space = gymnasium.spaces.utils.flatten_space(action_space)
-
 # observation_space = gymnasium.spaces.utils.flatten_space(observation_space)
 
 agents = [0, 1]
@@ -49,7 +52,6 @@ ray.init(local_mode=True)
 
 ModelCatalog.register_custom_model(
     "cc_model",
-    # YetAnotherTorchCentralizedCriticModel
     TorchCentralizedCriticModel
 
 )
@@ -59,7 +61,7 @@ config = (
     .experimental(_enable_new_api_stack=False)
     .environment(MultiAgentTrackingEnv, env_config=env_config, clip_actions=True)
     .framework('torch')
-    .rollouts(batch_mode="complete_episodes", num_rollout_workers=0)
+    .rollouts(batch_mode="complete_episodes", num_rollout_workers=3)
     .training(model={"custom_model": "cc_model"})
     .multi_agent(
         policies={
@@ -84,10 +86,11 @@ config = (
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
     .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
+    .training(train_batch_size=128, sgd_minibatch_size=32, num_sgd_iter=20)
 )
 
 stop = {
-    "training_iteration": 1,
+    "training_iteration": 50,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 9,
 }
@@ -119,6 +122,7 @@ obs, _ = env.reset()
 
 done = False
 while not done:
+    #TODO change observation at timestep 0 to something relevant
     parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
     parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 
