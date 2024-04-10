@@ -1,23 +1,22 @@
 import os
 import pprint
 
-import gymnasium.spaces.utils
-import numpy as np
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
-from gymnasium.spaces import Discrete
-from ray import tune, air, train
+from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.models import ModelCatalog
-from ray.rllib.policy.policy import PolicySpec
-from ray.tune.schedulers import ASHAScheduler
 
 from prototype.ccdc.src.centralized_critic import CentralizedCritic
 from prototype.ccdc.src.critic import TorchCentralizedCriticModel
 from tracking_env import MultiAgentTrackingEnv
 
+# os.environ['TUNE_DISABLE_AUTO_CALLBACK_LOGGERS'] = 1
+
 # pulse duration -> 10 - 50 us
 # pRI - prime would be nice, [2,4] kHz
+
+# TODO expand action space?
 action_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
      'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
@@ -29,7 +28,8 @@ observation_space = Dict(
      'PD': Box(low=-1, high=1),
      'ratio': Box(low=0, high=100),
      'r_hat': Box(low=0, high=1e5),
-     'v_hat': Box(low=0, high=1e3)
+     'v_hat': Box(low=0, high=1e3),
+     # 'v_wind' : Box(low=0, high=40)
      }
 )
 
@@ -47,8 +47,7 @@ env_config = {
     'observation_space': observation_space
 }
 
-ray.init(local_mode=True)
-
+ray.init()
 
 ModelCatalog.register_custom_model(
     "cc_model",
@@ -90,20 +89,21 @@ config = (
 )
 
 stop = {
-    "training_iteration": 50,
+    # "training_iteration": 100,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 9,
+    "time_total_s" : 7200
 }
 
 tuner = tune.Tuner(
     CentralizedCritic,
     param_space=config.to_dict(),
-    run_config=air.RunConfig(stop=stop, verbose=1),
+    run_config=air.RunConfig(stop=stop, verbose=1,
+                             storage_path="C:/Users/gaghir/OneDrive - TNO/Repositories/thesis/prototype/ccdc/src/results", name="cc"),
 )
 results = tuner.fit()
 
-
-best_result = results.get_best_result(metric='episode_reward_mean', mode='min', scope='all')
+best_result = results.get_best_result(metric='episode_reward_mean', mode='max', scope='all')
 
 print("\nBest performing trial's final reported metrics:\n")
 
@@ -122,7 +122,7 @@ obs, _ = env.reset()
 
 done = False
 while not done:
-    #TODO change observation at timestep 0 to something relevant
+    # TODO change observation at timestep 0 to something relevant
     parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
     parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 

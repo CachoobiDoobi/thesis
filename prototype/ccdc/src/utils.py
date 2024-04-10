@@ -69,6 +69,7 @@ def build_graphs_from_batch(bursts):
         for node1 in graph.nodes():
             for node2 in graph.nodes():
                 if node1 != node2:  # No self-loops
+                    # TODO compute it using PRF and pulse duration only
                     similarity = calculate_similarity(graph.nodes[node1]['param'], graph.nodes[node2]['param'])
                     # The more dissimilar, the more likely to be linked
                     metric = 1 - similarity

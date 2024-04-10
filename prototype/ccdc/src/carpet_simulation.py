@@ -1,4 +1,6 @@
 ####### our case #######
+import math
+
 import numpy as np
 from carpet import carpet
 from torch import Tensor
@@ -6,18 +8,26 @@ from torch import Tensor
 from config import param_dict
 
 
+# TODO do the Arne things
 class CarpetSimulation:
     def __init__(self, ranges: [Tensor], velocities: [Tensor]):
         self.ranges = ranges
         self.velocities = velocities
+        self.altitudes = np.random.uniform(low=10, high=1e4, size=self.ranges.shape[0])
         self.doppler_resolution = 0
         self.snr = None
 
+        carpet.Clutter_SurfaceClutter = True
+        carpet.Target_RCS1 = np.random.uniform(2, 20)
+        carpet.Propagation_WindDirection = np.pi
+        carpet.Propagation_Vwind = np.random.uniform(20, 30)
+        carpet.Processing_DFB = True
+        carpet.Processing_MTI = 'no'
+        carpet.Processing_Integrator = 'm out n'
+        # what is this?
+        carpet.Processing_M = 3
+
     def detect(self, action_dict):
-        c = 299792458
-        alt = [1000] * self.ranges.shape[0]
-        # param_names = ['PRF', 'Tau', 'PulsesPerBurst', 'NrBursts']
-        # filtered_attributes = [attr_name for attr_name in dir(carpet) if any(substring in attr_name for substring in param_names)]
 
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]
@@ -32,17 +42,11 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
 
-        # is this correct?
-        carpet.Clutter_SurfaceClutter = True
-        carpet.Propagation_WindDirection = np.pi
-        # carpet.Surface
-
-        # extra Doppler filter banks processing and moving target indication # according to Matijs this Doppler filter banks needs to be turned on? Not sure what it does.
-        carpet.Processing_DFB = True
-        carpet.Processing_MTI = 'no'
-        carpet.Processing_Integrator = 'm out n'
-        # what is this?
-        carpet.Processing_M = 3
-        pds = carpet.detection_probability(ranges=self.ranges, velocities=self.velocities, heights=alt)
+        r = float(self.ranges[0])
+        vel = float(self.velocities[0])
+        alt = float(self.altitudes[0])
+        # print(r, vel , alt)
+        pds = carpet.detection_probability(ground_ranges=r, radial_velocities=vel, altitudes=alt)
         scnr = carpet.GetSCNR()
-        return pds.reshape(-1)[0], scnr
+        # print(pds, scnr)
+        return (pds, scnr) if not math.isnan(pds) else (0, 0)

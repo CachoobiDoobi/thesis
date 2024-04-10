@@ -4,7 +4,7 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from torch_geometric.nn import GCNConv
-from torch.nn import ModuleList
+from torch.nn import ModuleList, Linear
 
 from utils import build_graphs_from_batch, preprocess_observations
 
@@ -27,13 +27,19 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.dropout_rate = 0.2  # dropout_rate
         self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
         self.relu = nn.PReLU()
+        # hardcode number of bursts
+        self.linear = Linear(in_features=6, out_features=1)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         input_size = 3
+        hidden_dim = 128
 
         # TODO expand this model
         self.convs = ModuleList([
-            GCNConv(input_size, 16),
-            GCNConv(16, 1)
+            GCNConv(input_size, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, 1)
         ])
 
     @override(ModelV2)
@@ -61,8 +67,9 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
                 x = self.dropout(x)
             x = self.convs[-1](x=x, edge_index=edge_index)
             x = x.reshape(bursts.shape[0], -1)
-            x = x.mean(dim=1)
-        return x
+            # use a FC net here
+            x = self.linear(x)
+            return x.reshape(-1)
 
     @override(ModelV2)
     def value_function(self):
