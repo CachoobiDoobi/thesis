@@ -23,13 +23,13 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch carpet_sim
                 --single-branch
                 project;
             cd project/prototype/baseline_multiburst/src;
             python main.py;
             cd;
-            cp -r  /project/prototype/baseline_multiburst/src/results /nas-tmp/Radu;"
+            cp -r  /project/prototype/baseline_multiburst/src/results /nas-tmp/Radu/baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;
           #            poetry self update;

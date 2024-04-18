@@ -1,33 +1,35 @@
 import pprint
 
-import numpy as np
-import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
-from gymnasium.spaces import Discrete
-from ray import tune, air, train
+from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
-from ray.tune.schedulers import ASHAScheduler
 
 from tracking_env import TrackingEnv
 
-agents = ['baseline']
-
-# pulse duration -> 10 - 50 us
-# pRI - prime would be nice, [2,4] kHz
+agents = [0]
+n_bursts = 6
+# TODO add RF frequency
 action_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
-     'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
-     'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10])})
+    {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
+     'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
+     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts)})
 observation_space = Dict(
-    {'pulse_duration': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
-     'PRI': MultiDiscrete(nvec=[5, 5, 5], start=[0, 0, 0]),
-     'n_pulses': MultiDiscrete(nvec=[21, 21, 21], start=[10, 10, 10]),
-     'PD': Box(low=-1, high=1),
-     'ratio': Box(low=0, high=100)})
+    {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
+      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
+     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
+     'PD': Box(low=0, high=1),
+     'ratio': Box(low=0, high=100),
+     'r_hat': Box(low=0, high=1e5),
+     'v_hat': Box(low=0, high=1e3),
+     'v_wind': Box(low=0, high=40),
+     'alt': Box(low=10, high=30)
+     }
+)
 
+# TODO testr if we made this much longer
 env_config = {
-    "ts": 10,
+    "ts": 20,
     'agents': agents,
     # Actions -> [pulse_duration, n_pulses, bandwidth, PRF]
     'action_space': action_space,
@@ -36,62 +38,43 @@ env_config = {
 }
 
 policies = {
-    "baseline": PolicySpec(),
+    "pol1": PolicySpec(),
 }
 
 
 # Policy to agent mapping function
 def mapping_fn(agent_id, episode, worker, **kwargs):
-    return 'baseline'
+    return 'pol1'
 
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=3)
-    # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
+    .rollouts(num_rollout_workers=20)
+    .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    .resources(num_gpus=0, num_cpus_per_worker=2)
-    .training(train_batch_size=tune.grid_search([128, 256, 512]), sgd_minibatch_size=tune.grid_search([32, 64]), num_sgd_iter=tune.grid_search([20, 30]))
+    .resources(num_gpus=1, num_cpus_per_worker=2)
+    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
-    # config = (
-    #     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
-    #     .rollouts(num_rollout_workers=20)
-    #     # .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
-    #     .framework("torch")
-    #     # .evaluation(evaluation_num_workers=1, evaluation_interval=5)
-    #     .resources(num_gpus=1, num_cpus_per_worker=2)
-    #     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
-    #     .environment(disable_env_checking=True)
 
 )
 
 stop = {
-    "training_iteration": 100,
-    # "time_budget_s":
+    # "training_iteration": 10,
+    "time_total_s": 3600 * 16
     # "episode_reward_mean": 10,
     # "episodes_total": 900
 }
 
-asha_scheduler = ASHAScheduler(
-    time_attr='training_iteration',
-    metric='episode_reward_mean',
-    mode='max',
-    # grace_period=10,
-    # reduction_factor=3,
-    # brackets=1,
-)
-# can i write results directly to nas-tmp?
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
-                             name="carpetsim", checkpoint_config=train.CheckpointConfig(
-            checkpoint_frequency=20, checkpoint_at_end=True)),
+                             name="carpetsim"),
     tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
 ).fit()
 
-best_result = results.get_best_result(metric='episode_reward_mean', mode='min', scope='all')
+best_result = results.get_best_result(metric='episode_reward_mean', mode='max', scope='all')
 
 print("\nBest performing trial's final reported metrics:\n")
 
@@ -108,11 +91,12 @@ env = TrackingEnv(env_config=config["env_config"])
 
 obs, _ = env.reset()
 
-truncated = False
-
-while not truncated:
-    parameters = agent.compute_single_action(obs)
+done = False
+while not done:
+    parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+    actions = {0: parameters_1}
     # print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
-    obs, reward, _, truncated, _ = env.step(parameters)
+    obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
+    done = terminateds["__all__"]
 env.render()

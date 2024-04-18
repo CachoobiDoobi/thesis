@@ -1,44 +1,69 @@
 ####### our case #######
+import logging
+import math
+import platform
+
 import numpy as np
 from carpet import carpet
-from torch import Tensor
 
 from config import param_dict
 
 
 class CarpetSimulation:
-    def __init__(self, ranges: [Tensor], velocities: [Tensor]):
-        self.ranges = ranges
-        self.velocities = velocities
-        self.doppler_resolution = 0
-        self.snr = None
+    def __init__(self):
+        if platform.system() == 'Linux':
+            # carpet.read_license("Przlwkofsky")
+            carpet.read_license("/project/carpet3.lcs")
+        # Reset
+        #carpet.reset_radars()
+        # Set conditions
+        #carpet.Clutter_SurfaceClutter = True
+        #carpet.Target_RCS1 = np.random.uniform(2, 20)
+        # carpet.Propagation_WindDirection =
+        #carpet.Propagation_Vwind = np.random.uniform(0, 30)
 
-    def detect(self, parameters):
-        c = 299792458
-        alt = [1000] * self.ranges.shape[0]
-        # param_names = ['PRF', 'Tau', 'PulsesPerBurst', 'NrBursts']
-        # filtered_attributes = [attr_name for attr_name in dir(carpet) if any(substring in attr_name for substring in param_names)]
-
-        pulse_durations = parameters.get("pulse_duration")
-        n_pulseses = parameters.get('n_pulses')
-        pris = parameters.get('PRI')
-        n_bursts = len(pris)
-
-        for n in range(1, n_bursts + 1):
-            i = str(n)
-            setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
-            setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
-            setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
-
-        carpet.Clutter_SurfaceClutter = True
-        carpet.Propagation_WindDirection = np.pi
-        # carpet.Surface
-
-        # extra Doppler filter banks processing and moving target indication # according to Matijs this Doppler filter banks needs to be turned on? Not sure what it does.
+        # Processing
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'
         carpet.Processing_Integrator = 'm out n'
-        # what is this
+        # what is this?
         carpet.Processing_M = 3
-        pds = carpet.detection_probability(ranges=self.ranges, velocities=self.velocities, heights=alt)
-        return pds.reshape(-1)[0]
+
+    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs):
+        carpet.Target_Azimuth = 0
+        carpet.Processing_DFB = True
+        carpet.Processing_MTI = 'no'
+        carpet.Processing_Integrator = 'm out n'
+        carpet.Clutter_SurfaceClutter = True
+        carpet.Target_RCS1 = rcs
+        carpet.Propagation_WindDirection = 180
+        carpet.Propagation_Vwind = wind_speed
+        # what is this?
+        carpet.Processing_M = 3
+        for m, agent in enumerate(action_dict):
+            parameters = action_dict[agent]
+            pulse_durations = parameters.get("pulse_duration")
+            n_pulseses = parameters.get('n_pulses')
+            pris = parameters.get('PRI')
+            n_bursts = len(pris)
+
+            for n in range(1, n_bursts + 1):
+                i = str(n + m * n_bursts)
+                setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
+                setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
+                setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
+
+        assert range_ > 0, "NEGATIVE RANGE"
+
+        carpet.Target_GroundRange = range_
+        carpet.Target_RadialVelocity = velocity
+        carpet.Target_Altitude = altitude
+        # pds = carpet.GetPd()
+        pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
+        scnr = carpet.signal_clutter_noise_power_ratio(ground_ranges=range_, radial_velocities=velocity,altitudes=altitude)
+        # print(pds, scnr)
+        return (pds, scnr) if not math.isnan(pds) else (0, 0)
+
+    # not thread safe
+    # def getWindSpeed(self):
+    #     return carpet.Propagation_Vwind

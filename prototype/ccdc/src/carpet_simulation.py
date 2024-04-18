@@ -1,33 +1,35 @@
 ####### our case #######
 import math
+import platform
 
 import numpy as np
 from carpet import carpet
-from torch import Tensor
 
 from config import param_dict
 
 
-# TODO do the Arne things
 class CarpetSimulation:
-    def __init__(self, ranges: [Tensor], velocities: [Tensor]):
-        self.ranges = ranges
-        self.velocities = velocities
-        self.altitudes = np.random.uniform(low=10, high=1e4, size=self.ranges.shape[0])
-        self.doppler_resolution = 0
-        self.snr = None
+    def __init__(self):
+        if platform.system() == 'Linux':
+            # carpet.read_license("Przlwkofsky")
+            carpet.read_license("/project/carpet3.lcs")
+        # Reset
+       # carpet.reset_radars()
+        # Set conditions
 
+
+    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs):
         carpet.Clutter_SurfaceClutter = True
-        carpet.Target_RCS1 = np.random.uniform(2, 20)
-        carpet.Propagation_WindDirection = np.pi
-        carpet.Propagation_Vwind = np.random.uniform(20, 30)
+        carpet.Target_RCS1 = rcs
+        carpet.Propagation_Vwind = wind_speed
+        carpet.Target_Azimuth = 0
+        carpet.Propagation_WindDirection = 180
+        # Processing
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'
         carpet.Processing_Integrator = 'm out n'
         # what is this?
         carpet.Processing_M = 3
-
-    def detect(self, action_dict):
 
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]
@@ -42,11 +44,14 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
 
-        r = float(self.ranges[0])
-        vel = float(self.velocities[0])
-        alt = float(self.altitudes[0])
         # print(r, vel , alt)
-        pds = carpet.detection_probability(ground_ranges=r, radial_velocities=vel, altitudes=alt)
+        carpet.Target_GroundRange = range_
+        carpet.Target_RadialVelocity = velocity
+        carpet.Target_Altitude = altitude
+        pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
         scnr = carpet.GetSCNR()
         # print(pds, scnr)
         return (pds, scnr) if not math.isnan(pds) else (0, 0)
+
+    def getWindSpeed(self):
+        return carpet.Propagation_Vwind

@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: train-baseline
+  name: train-cc
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -18,19 +18,19 @@ spec:
       containers:
       - name: thesis
         image: gitlab.tsn.tno.nl:4567/gaghir/thesis:latest
+        #mac_address: C4-65-16-00-49-94
         command:
           - /bin/bash
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch carpet_sim
                 --single-branch
                 project;
-            cd project/prototype/baseline_multiburst/src;
+            cd project/prototype/ccdc/src;
             python main.py;
             cd;
-            cp -r  /project/prototype/baseline_multiburst/src/results /nas-tmp/Radu;"
-#            trap : TERM INT; sleep infinity & wait;"
+            cp -r  /project/prototype/ccdc/src/results /nas-tmp/Radu/multi;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;
