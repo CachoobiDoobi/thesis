@@ -55,6 +55,8 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         self.altitude = None
 
+        self.rainfall_rate = None
+
         self.reset()
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):

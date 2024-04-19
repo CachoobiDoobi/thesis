@@ -13,10 +13,6 @@ class CarpetSimulation:
         if platform.system() == 'Linux':
             # carpet.read_license("Przlwkofsky")
             carpet.read_license("/project/carpet3.lcs")
-        # Reset
-       # carpet.reset_radars()
-        # Set conditions
-
 
     def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs, rainfall_rate):
         carpet.Clutter_SurfaceClutter = True
