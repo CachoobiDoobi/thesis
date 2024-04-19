@@ -18,7 +18,7 @@ class CarpetSimulation:
         # Set conditions
 
 
-    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs):
+    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs, rainfall_rate):
         carpet.Clutter_SurfaceClutter = True
         carpet.Target_RCS1 = rcs
         carpet.Propagation_Vwind = wind_speed
@@ -30,7 +30,8 @@ class CarpetSimulation:
         carpet.Processing_Integrator = 'm out n'
         # what is this?
         carpet.Processing_M = 3
-
+        carpet.Clutter_RainPresent = True
+        carpet.Clutter_RainfallRate = rainfall_rate
 
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]

@@ -93,6 +93,8 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         self.rcs = np.random.uniform(1, 10)
 
+        self.rainfall_rate = np.random.uniform(0, 100)
+
         return self._get_obs(), {}
 
     def step(self, action_dict):
@@ -109,7 +111,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         range = self.truth[self.timesteps - 1].state_vector[0]
         velocity = self.truth[self.timesteps - 1].state_vector[1]
 
-        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=self.altitude, wind_speed=self.wind_speed, rcs=self.rcs)
+        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=self.altitude, wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
 
         if scnr != 0:
             #print(f"The speed of light {c}, and the scnr{scnr}")

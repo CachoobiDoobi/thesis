@@ -94,7 +94,7 @@ stop = {
     # "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 2
+    "time_total_s": 3600 * 14
 }
 
 storage = os.path.abspath("results")
@@ -131,6 +131,8 @@ env.wind_speed = 40
 env.altitude = 10
 
 env.rcs = 3
+
+env.rainfall_rate = 100
 
 done = False
 while not done:
