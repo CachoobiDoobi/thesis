@@ -88,6 +88,7 @@ config = (
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
     .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    .disable_env_checking(True)
 )
 
 stop = {
