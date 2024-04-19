@@ -60,7 +60,7 @@ ModelCatalog.register_custom_model(
 config = (
     PPOConfig()
     .experimental(_enable_new_api_stack=False)
-    .environment(MultiAgentTrackingEnv, env_config=env_config, clip_actions=True)
+    .environment(MultiAgentTrackingEnv, env_config=env_config, clip_actions=True, disable_env_checking=True)
     .framework('torch')
     .rollouts(batch_mode="complete_episodes", num_rollout_workers=20)
     .training(model={"custom_model": "cc_model"})
@@ -88,7 +88,6 @@ config = (
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
     .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
-    .disable_env_checking(True)
 )
 
 stop = {
