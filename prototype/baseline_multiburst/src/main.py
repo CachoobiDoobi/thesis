@@ -1,5 +1,7 @@
+import os
 import pprint
 
+import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
@@ -46,6 +48,7 @@ policies = {
 def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
+ray.init()
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
@@ -66,13 +69,13 @@ stop = {
     # "episodes_total": 900
 }
 
+storage = os.path.abspath("results")
+
 results = tune.Tuner(
     "PPO",
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
-                             name="carpetsim"),
-    tune_config=tune.TuneConfig(metric='episode_reward_mean', mode='max', ),
-).fit()
+                             name="single_agent_baseline", storage_path=storage),).fit()
 
 best_result = results.get_best_result(metric='episode_reward_mean', mode='max', scope='all')
 
@@ -89,7 +92,14 @@ agent = Algorithm.from_checkpoint(best_result.checkpoint)
 
 env = TrackingEnv(env_config=config["env_config"])
 
+
 obs, _ = env.reset()
+
+env.wind_speed = 40
+
+env.altitude = 10
+
+env.rcs = 3
 
 done = False
 while not done:

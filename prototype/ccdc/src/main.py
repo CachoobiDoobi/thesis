@@ -94,15 +94,17 @@ stop = {
     # "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 4
+    "time_total_s": 3600 * 2
 }
+
+storage = os.path.abspath("results")
 
 tuner = tune.Tuner(
     CentralizedCritic,
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
-                             #storage_path="C:/Users/gaghir/OneDrive - TNO/Repositories/thesis/prototype/ccdc/src/results",
-                             name="HighFly"),
+                             storage_path=storage,
+                             name="multiagent"),
 )
 results = tuner.fit()
 
@@ -123,6 +125,12 @@ agent = Algorithm.from_checkpoint(best_result.checkpoint)
 env = MultiAgentTrackingEnv(env_config=config["env_config"])
 
 obs, _ = env.reset()
+
+env.wind_speed = 40
+
+env.altitude = 10
+
+env.rcs = 3
 
 done = False
 while not done:
