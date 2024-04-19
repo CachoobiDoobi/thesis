@@ -91,10 +91,10 @@ config = (
 )
 
 stop = {
-    "training_iteration": 1,
+    # "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 16
+    "time_total_s": 3600 * 4
 }
 
 tuner = tune.Tuner(
