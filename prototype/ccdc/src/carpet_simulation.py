@@ -23,7 +23,7 @@ class CarpetSimulation:
         carpet.Target_RCS1 = rcs
         carpet.Propagation_Vwind = wind_speed
         carpet.Target_Azimuth = 0
-        carpet.Propagation_WindDirection = 180
+        carpet.Propagation_WindDirection = np.pi
         # Processing
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'

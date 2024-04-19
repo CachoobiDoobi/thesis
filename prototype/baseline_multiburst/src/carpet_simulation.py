@@ -36,7 +36,7 @@ class CarpetSimulation:
         carpet.Processing_Integrator = 'm out n'
         carpet.Clutter_SurfaceClutter = True
         carpet.Target_RCS1 = rcs
-        carpet.Propagation_WindDirection = 180
+        carpet.Propagation_WindDirection = np.pi
         carpet.Propagation_Vwind = wind_speed
         # what is this?
         carpet.Processing_M = 3
