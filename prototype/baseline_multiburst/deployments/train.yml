@@ -23,7 +23,7 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch carpet_sim
+                --branch main
                 --single-branch
                 project;
             cd project/prototype/baseline_multiburst/src;
