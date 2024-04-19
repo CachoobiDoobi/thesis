@@ -132,7 +132,7 @@ env.altitude = 10
 
 env.rcs = 3
 
-env.rainfall_rate = 100
+env.rainfall_rate = 0.000028
 
 done = False
 while not done:
