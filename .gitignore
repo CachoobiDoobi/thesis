@@ -1,3 +1,4 @@
 *.whl
 Dockerfile
-/results
+/prototype/ccdc/src/results/*
+
