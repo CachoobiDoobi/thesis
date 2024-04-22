@@ -34,6 +34,7 @@ class CarpetSimulation:
             pulse_durations = parameters.get("pulse_duration")
             n_pulseses = parameters.get('n_pulses')
             pris = parameters.get('PRI')
+            rfs = parameters.get('RF')
             n_bursts = len(pris)
 
             for n in range(1, n_bursts + 1):
@@ -41,6 +42,7 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
+                setattr(carpet,  f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
 
         # print(r, vel , alt)
         carpet.Target_GroundRange = range_

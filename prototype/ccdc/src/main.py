@@ -22,11 +22,14 @@ n_bursts = 3
 action_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
-     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts)})
+     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
+     'RF': MultiDiscrete(nvec=[2] * n_bursts),
+     })
 observation_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
-      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
+     'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
+     'RF': MultiDiscrete(nvec=[2] * n_bursts),
      'PD': Box(low=0, high=1),
      'ratio': Box(low=0, high=100),
      'r_hat': Box(low=0, high=1e5),
@@ -62,7 +65,7 @@ config = (
     .experimental(_enable_new_api_stack=False)
     .environment(MultiAgentTrackingEnv, env_config=env_config, clip_actions=True, disable_env_checking=True)
     .framework('torch')
-    .rollouts(batch_mode="complete_episodes", num_rollout_workers=20)
+    .rollouts(batch_mode="complete_episodes", num_rollout_workers=1)
     .training(model={"custom_model": "cc_model"})
     .multi_agent(
         policies={
@@ -86,7 +89,7 @@ config = (
         else "pol2",
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    .resources(num_gpus=1, num_cpus_per_worker=2)
+    .resources(num_gpus=0, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
 )
 

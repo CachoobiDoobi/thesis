@@ -26,14 +26,14 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_opponent_obs = {key: torch.argmax(original_opponent_obs[key], dim=-1) for key in original_opponent_obs}
     # extract burst params
     n_bursts = original_obs['PRI'].shape[1] + original_opponent_obs['PRI'].shape[1]
-    bursts = torch.zeros(batch_size, n_bursts, 3)  # hardcoded :(
+    bursts = torch.zeros(batch_size, n_bursts, 4)  # hardcoded :(
     # burst is [batch size, n_bursts, params], obs is keys, batch size, params
     observation = torch.zeros(batch_size, 6)
     for n in range(n_bursts):
         i = 0
         j = 0
         for key in original_obs:
-            if key in ['PRI', 'n_pulses', 'pulse_duration']:
+            if key in ['PRI', 'n_pulses', 'pulse_duration', 'RF']:
                 if n < n_bursts // 2:
                     bursts[:, n, i] = original_obs[key][:, n]
                 else:

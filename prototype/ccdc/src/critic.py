@@ -38,7 +38,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.out = Linear(in_features=6, out_features=1).to(device)
         # self.out.to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        input_size = 3 + 6 # equal to action space + EMBEDDINGS
+        input_size = 4 + 6 # equal to action space + EMBEDDINGS
         hidden_dim = 128
 
         self.convs = ModuleList([

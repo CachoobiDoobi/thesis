@@ -64,7 +64,7 @@ config = (
 
 stop = {
     # "training_iteration": 1,
-    "time_total_s": 3600 * 4
+    "time_total_s": 3600 * 14
     # "episode_reward_mean": 10,
     # "episodes_total": 900
 }

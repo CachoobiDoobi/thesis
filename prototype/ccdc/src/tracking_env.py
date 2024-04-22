@@ -74,19 +74,29 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         start_time = datetime.now()
 
-        transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(np.random.uniform(100, 600))])
+        transition_model_altitude = CombinedLinearGaussianTransitionModel([ConstantVelocity(100)])
+
+        transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
+
+        truth_alt = GroundTruthPath([GroundTruthState([np.random.uniform(10, 30), np.random.uniform(1, 3)], timestamp=start_time)])
 
         # 1d model
-        truth = GroundTruthPath([GroundTruthState([np.random.uniform(1e4, 5e4), 100], timestamp=start_time)])
+        truth = GroundTruthPath([GroundTruthState([np.random.uniform(1e4, 5e4), np.random.uniform(100, 500)], timestamp=start_time)])
 
         for k in range(1, self.timestep_limit):
             truth.append(GroundTruthState(
                 transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
                 timestamp=start_time + timedelta(seconds=k)))
+            truth_alt.append(GroundTruthState(
+                transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+                timestamp=start_time + timedelta(seconds=k)))
+            # print(truth[k].state_vector[0], truth[k].state_vector[1])
 
         self.truth = truth
 
-        self.altitude = np.random.uniform(low=10, high=30)
+        self.truth_alt=truth_alt
+
+        # self.altitude = np.random.uniform(low=10, high=30)
 
         self.target_resolution = np.random.choice(np.arange(20, 40))
 
@@ -115,11 +125,12 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
 
         range = self.truth[self.timesteps - 1].state_vector[0]
         velocity = self.truth[self.timesteps - 1].state_vector[1]
-
-        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=self.altitude, wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
+        alt = self.truth_alt[self.timesteps - 1].state_vector[0]
+        alt = alt if alt > 0 else abs(alt)
+        # print(range, velocity)
+        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=alt, wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
 
         if scnr != 0:
-            #print(f"The speed of light {c}, and the scnr{scnr}")
             self.range_uncertainty = c / (2 * 1e6 * np.sqrt(2 * scnr))
 
             duration = 0
@@ -128,7 +139,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
                 n_pulses = action_dict[agent]['n_pulses']
                 durations = pris * n_pulses
                 duration += np.sum(durations)
-            wavelength = c / 3300000000
+            wavelength = c / 6000000000
             self.velocity_uncertainty = wavelength / (2 * duration * np.sqrt(2 * scnr))
         else:
             self.range_uncertainty = 1
@@ -158,7 +169,7 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
                                                                                                             abs(vel * self.velocity_uncertainty),
                                                                                                             size=(1,))))
 
-        alt_hat = self.altitude * np.random.normal(1, 0.25)
+        alt_hat = self.truth_alt[self.timesteps - 1].state_vector[0] * np.random.normal(1, 0.25)
         alt_hat = np.array([alt_hat], dtype=np.float32)
         # print(range, vel, r_hat, v_hat, self.range_uncertainty, self.velocity_uncertainty)
         # for now 2 agents

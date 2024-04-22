@@ -48,12 +48,15 @@ class CarpetSimulation:
             n_pulseses = parameters.get('n_pulses')
             pris = parameters.get('PRI')
             n_bursts = len(pris)
+            rfs = parameters.get('RF')
 
             for n in range(1, n_bursts + 1):
                 i = str(n + m * n_bursts)
                 setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
+                setattr(carpet,  f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
+
 
         assert range_ > 0, "NEGATIVE RANGE"
 
