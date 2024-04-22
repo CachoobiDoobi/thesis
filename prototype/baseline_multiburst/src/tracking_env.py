@@ -7,6 +7,7 @@ from typing import Optional
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
+from carpet import carpet
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict, MultiEnvDict
 from scipy.constants import c
@@ -56,6 +57,8 @@ class TrackingEnv(MultiAgentEnv):
 
         self.altitude = None
 
+        self.rainfall_rate = None
+
         self.reset()
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
@@ -76,7 +79,7 @@ class TrackingEnv(MultiAgentEnv):
 
         # 1d model
         truth = GroundTruthPath([GroundTruthState([np.random.uniform(1e4, 5e4), 100], timestamp=start_time)])
-
+        # TODO add altitude variation
         for k in range(1, self.timestep_limit):
             state = GroundTruthState(
                 transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
@@ -96,6 +99,8 @@ class TrackingEnv(MultiAgentEnv):
 
         self.rcs = np.random.uniform(1, 10)
 
+        self.rainfall_rate = np.random.uniform(0, 2.8) * 10e-7
+
         return self._get_obs(), {}
 
     def step(self, action_dict):
@@ -114,7 +119,7 @@ class TrackingEnv(MultiAgentEnv):
         range = self.truth[self.timesteps - 1].state_vector[0]
         velocity = self.truth[self.timesteps - 1].state_vector[1]
 
-        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=self.altitude, wind_speed=self.wind_speed, rcs=self.rcs)
+        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=self.altitude, wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
 
         if scnr != 0:
             # print(f"The speed of light {c}, and the scnr{scnr}")
@@ -253,3 +258,15 @@ class TrackingEnv(MultiAgentEnv):
         )
         # Save the second plot to a file
         pio.write_image(fig2, 'results/waveform_duration_ratio.pdf')
+
+        track = carpet.firm_track_probability(self.pds)
+        fig3 = go.Figure()
+        fig3.add_trace(
+            go.Scatter(x=np.arange(self.timestep_limit), y=track, mode='lines', name='Tracking probability'))
+        fig3.update_layout(
+            title="Tracking probability",
+            xaxis_title="Time",
+            yaxis_title="Probability"
+        )
+        # Save the second plot to a file
+        pio.write_image(fig3, 'results/firm_track_prob.pdf')

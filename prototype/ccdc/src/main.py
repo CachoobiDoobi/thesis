@@ -128,11 +128,11 @@ obs, _ = env.reset()
 
 env.wind_speed = 10
 
-env.altitude = 30
+env.altitude = 10
 
-env.rcs = 5
+env.rcs = 3
 
-env.rainfall_rate = 0#2.7 * 10e-7
+env.rainfall_rate = 2.7 * 10e-7
 
 done = False
 while not done:

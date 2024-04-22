@@ -29,7 +29,7 @@ class CarpetSimulation:
         # what is this?
         carpet.Processing_M = 3
 
-    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs):
+    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs, rainfall_rate):
         carpet.Target_Azimuth = 0
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'
@@ -38,6 +38,8 @@ class CarpetSimulation:
         carpet.Target_RCS1 = rcs
         carpet.Propagation_WindDirection = np.pi
         carpet.Propagation_Vwind = wind_speed
+        carpet.Clutter_RainPresent = True
+        carpet.Clutter_RainfallRate = rainfall_rate
         # what is this?
         carpet.Processing_M = 3
         for m, agent in enumerate(action_dict):
