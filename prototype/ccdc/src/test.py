@@ -85,4 +85,5 @@ while not done:
     obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
     done = terminateds["__all__"]
+
 env.render()

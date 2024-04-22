@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Optional
 
+import carpet
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -252,3 +253,15 @@ class MultiAgentTrackingEnv(MultiAgentEnv):
         )
         # Save the second plot to a file
         pio.write_image(fig2, 'results/waveform_duration_ratio.pdf')
+
+        track = carpet.carpet.firm_track_probability(self.pds)
+        fig3 = go.Figure()
+        fig3.add_trace(
+            go.Scatter(x=np.arange(self.timestep_limit), y=track, mode='lines', name='Tracking probability'))
+        fig3.update_layout(
+            title="Tracking probability",
+            xaxis_title="Time",
+            yaxis_title="Probability"
+        )
+        # Save the second plot to a file
+        pio.write_image(fig3, 'results/firm_track_prob.pdf')

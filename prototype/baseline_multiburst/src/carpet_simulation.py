@@ -58,10 +58,10 @@ class CarpetSimulation:
         carpet.Target_GroundRange = range_
         carpet.Target_RadialVelocity = velocity
         carpet.Target_Altitude = altitude
-        # pds = carpet.GetPd()
+
         pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
         scnr = carpet.signal_clutter_noise_power_ratio(ground_ranges=range_, radial_velocities=velocity,altitudes=altitude)
-        # print(pds, scnr)
+
         return (pds, scnr) if not math.isnan(pds) else (0, 0)
 
     # not thread safe
