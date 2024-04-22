@@ -49,7 +49,7 @@ env_config = {
     'observation_space': observation_space
 }
 
-ray.init(num_gpus=0, num_cpus=4)
+ray.init()
 
 ModelCatalog.register_custom_model(
     "cc_model",
@@ -81,7 +81,7 @@ while not done:
     parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 
     actions = {0: parameters_1, 1: parameters_2}
-    # print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
+    print(f"Parameters: {None} given observation at previous timestep: {obs}")
     obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
     done = terminateds["__all__"]
