@@ -9,8 +9,7 @@ from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 from common.tracking_env import TrackingEnv
 
-os.environ['PYTHONPATH'] = '/project/common'
-
+os.environ['PYTHONPATH'] = 'root/project/common'
 
 agents = [0]
 n_bursts = 6
