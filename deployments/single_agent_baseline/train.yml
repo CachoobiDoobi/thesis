@@ -26,6 +26,8 @@ spec:
                 --branch main
                 --single-branch
                 project;
+                
+            export PATH=$PATH:/project/common;
             python3 project/single_agent_baseline/train.py;
             cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/baseline;"
 #            trap : TERM INT; sleep infinity & wait;"

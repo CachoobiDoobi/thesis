@@ -10,11 +10,11 @@ from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
 if platform.system() == 'Linux':
-    file_dir = os.path.dirname("/project/common/")
+    file_dir = os.path.dirname("../")
     sys.path.append(file_dir)
     print(sys.path)
 
-from common.tracking_env import TrackingEnv
+import common
 
 agents = [0]
 n_bursts = 6
