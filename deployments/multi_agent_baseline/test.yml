@@ -27,10 +27,10 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            cd project/src/multi_agent_baseline;
-            python test.py;
+            cd project;
+            python3 -m multi_agent_critic.test.py;
             cd;
-            cp -r  /project/src/multi_agent_baseline/results /nas-tmp/Radu/multiagent-baseline;"
+            cp -r  /project/multi_agent_critic/results /nas-tmp/Radu/multi_agent_baseline;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;

@@ -1,5 +1,6 @@
 import os
 import pprint
+import sys
 
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
@@ -7,6 +8,9 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 from common.tracking_env import TrackingEnv
+
+sys.path.append('/project/common/')
+
 
 agents = [0]
 n_bursts = 6

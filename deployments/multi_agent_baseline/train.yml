@@ -26,10 +26,10 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            cd project/src/multi_agent_baseline;
-            python train.py;
+            cd project;
+            python3 -m multi_agent_baseline.train.py;
             cd;
-            cp -r  /project/src/multi_agent_baseline/results /nas-tmp/Radu/multi_agent_baseline;"
+            cp -r  /project/multi_agent_baseline/results /nas-tmp/Radu/multi_agent_baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;
           #            poetry self update;
