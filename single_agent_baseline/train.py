@@ -9,10 +9,10 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
-if platform.system() == 'Linux':
-    file_dir = os.path.dirname("../")
-    sys.path.append(file_dir)
-    print(sys.path)
+# if platform.system() == 'Linux':
+#     file_dir = os.path.dirname("../")
+#     sys.path.append(file_dir)
+#     print(sys.path)
 
 import common
 
