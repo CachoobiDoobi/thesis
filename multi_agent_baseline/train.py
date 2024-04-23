@@ -73,8 +73,8 @@ config = (
 )
 
 stop = {
-    "training_iteration": 1,
-    # "time_total_s": 3600 * 14
+    # "training_iteration": 1,
+    "time_total_s": 3600 * 18
     # "episode_reward_mean": 10,
     # "episodes_total": 900
 }

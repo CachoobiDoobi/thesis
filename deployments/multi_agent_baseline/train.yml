@@ -27,7 +27,7 @@ spec:
                 --single-branch
                 project;
             cd project;
-            python3 -m multi_agent_baseline.train.py;
+            python3 multi_agent_baseline/train.py;
             cd;
             cp -r  /project/multi_agent_baseline/results /nas-tmp/Radu/multi_agent_baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
