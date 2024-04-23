@@ -1,20 +1,12 @@
 import os
-import platform
 import pprint
-import sys
 
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
-
-# if platform.system() == 'Linux':
-#     file_dir = os.path.dirname("../")
-#     sys.path.append(file_dir)
-#     print(sys.path)
-
-import common
+from common.tracking_env import  TrackingEnv
 
 agents = [0]
 n_bursts = 6
