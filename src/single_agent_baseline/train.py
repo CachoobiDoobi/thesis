@@ -1,5 +1,7 @@
 import os
+import platform
 import pprint
+import sys
 
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
@@ -8,6 +10,10 @@ from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
 from src.tracking_env import TrackingEnv
+
+if platform.system() == 'Linux':
+    file_dir = os.path.dirname("/project/src")
+    sys.path.append(file_dir)
 
 agents = [0]
 n_bursts = 6

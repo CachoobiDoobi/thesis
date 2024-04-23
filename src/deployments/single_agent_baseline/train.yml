@@ -26,9 +26,7 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            cd project/src/single_agent_baseline;
-            python train.py;
-            cd;
+            python3 project/src/single_agent_baseline/train.py;
             cp -r  /project/src/single_agent_baseline/results /nas-tmp/Radu/baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;

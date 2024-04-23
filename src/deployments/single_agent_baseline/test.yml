@@ -28,7 +28,7 @@ spec:
                 --single-branch
                 project;
             cd project/src/single_agent_baseline/src;
-            python test.py;
+            python3 test.py;
             cd;
             cp -r  /project/src/single_agent_baseline/src/results /nas-tmp/Radu/single_agent_baseline;"
           # pyenv install 3.9.0;
