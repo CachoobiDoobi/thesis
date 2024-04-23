@@ -1,17 +1,12 @@
-import logging
 import os
 import pprint
-import sys
-import pathlib
-
-logging.error(pathlib.Path(__file__).parent.resolve())
-os.environ['PYTHONPATH'] = 'root:/project/common/'
 
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
+
 from common.tracking_env import TrackingEnv
 
 agents = [0]
@@ -57,7 +52,7 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
 
-ray.init()
+ray.init(address='auto', runtime_env={"working_dir": "./"})
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
