@@ -1,3 +1,4 @@
+import logging
 import os
 import pprint
 import sys
@@ -10,7 +11,7 @@ from ray.rllib.policy.policy import PolicySpec
 from common.tracking_env import TrackingEnv
 
 import pathlib
-print(pathlib.Path(__file__).parent.resolve())
+logging.error(pathlib.Path(__file__).parent.resolve())
 os.environ['PYTHONPATH'] = '/root/project/common/'
 
 agents = [0]
