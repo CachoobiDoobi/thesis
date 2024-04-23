@@ -12,6 +12,7 @@ from ray.rllib.policy.policy import PolicySpec
 if platform.system() == 'Linux':
     file_dir = os.path.dirname("/project/src/common")
     sys.path.append(file_dir)
+    print(sys.path)
 
 from src.common.tracking_env import TrackingEnv
 
