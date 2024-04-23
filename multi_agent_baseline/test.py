@@ -2,7 +2,7 @@ import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
 
-from src.tracking_env import TrackingEnv
+from common.tracking_env import TrackingEnv
 
 
 n_bursts = 3
@@ -44,7 +44,7 @@ cdir = '/nas-tmp/Radu/multi/results/single_agent_baseline/PPO_TrackingEnv_aa42b_
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
 
-env = TrackingEnv(env_config=env_config)
+env =TrackingEnv(env_config=env_config)
 
 obs, _ = env.reset()
 

@@ -5,7 +5,7 @@ from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 
-from src.tracking_env import TrackingEnv
+from common.tracking_env import TrackingEnv
 
 agents = [0, 1]
 n_bursts = 3
@@ -45,7 +45,7 @@ config = (
     .experimental(_enable_new_api_stack=False)
     .environment(TrackingEnv, env_config=env_config, clip_actions=True, disable_env_checking=True)
     .framework('torch')
-    .rollouts(batch_mode="complete_episodes", num_rollout_workers=2)
+    .rollouts(batch_mode="complete_episodes", num_rollout_workers=20)
     .multi_agent(
         policies={
             "pol1": (
@@ -68,7 +68,7 @@ config = (
         else "pol2",
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    .resources(num_gpus=0, num_cpus_per_worker=2)
+    .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
 )
 

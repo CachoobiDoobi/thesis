@@ -55,10 +55,10 @@ ray.init()
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=2)
+    .rollouts(num_rollout_workers=20)
     .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
-    .resources(num_gpus=0, num_cpus_per_worker=2)
+    .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
 

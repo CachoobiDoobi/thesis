@@ -6,7 +6,7 @@ import platform
 import numpy as np
 from carpet import carpet
 
-from config import param_dict
+from common.config import param_dict
 
 
 class CarpetSimulation:
