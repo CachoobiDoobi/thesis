@@ -10,7 +10,7 @@ from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
 if platform.system() == 'Linux':
-    file_dir = os.path.dirname("../")
+    file_dir = os.path.dirname("..//")
     sys.path.append(file_dir)
     print(sys.path)
 
