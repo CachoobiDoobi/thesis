@@ -5,7 +5,7 @@ from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 
-from common.tracking_env import TrackingEnv
+from tracking_env import TrackingEnv
 
 agents = [0, 1]
 n_bursts = 3

@@ -9,7 +9,7 @@ from ray.rllib.models import ModelCatalog
 
 from centralized_critic import CentralizedCritic
 from model import TorchCentralizedCriticModel
-from common.tracking_env import TrackingEnv
+from tracking_env import TrackingEnv
 
 n_bursts = 3
 

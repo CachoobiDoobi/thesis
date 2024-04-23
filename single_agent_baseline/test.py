@@ -2,7 +2,7 @@ import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
 
-from common.tracking_env import TrackingEnv
+from tracking_env import TrackingEnv
 
 n_bursts = 3
 

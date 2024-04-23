@@ -8,7 +8,7 @@ from ray.rllib.utils.framework import try_import_torch
 from torch_geometric.nn import GCNConv, global_mean_pool
 from torch.nn import ModuleList, Linear
 
-from common.utils import build_graphs_from_batch, preprocess_observations
+from utils import build_graphs_from_batch, preprocess_observations
 
 torch, nn = try_import_torch()
 
