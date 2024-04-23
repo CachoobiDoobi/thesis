@@ -9,7 +9,7 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
-from src.tracking_env import TrackingEnv
+from src.common.tracking_env import TrackingEnv
 
 if platform.system() == 'Linux':
     file_dir = os.path.dirname("/project/src")
