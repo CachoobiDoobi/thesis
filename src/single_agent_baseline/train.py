@@ -9,11 +9,11 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
-from src.common.tracking_env import TrackingEnv
-
 if platform.system() == 'Linux':
-    file_dir = os.path.dirname("/project/src")
+    file_dir = os.path.dirname("/project/src/common")
     sys.path.append(file_dir)
+
+from src.common.tracking_env import TrackingEnv
 
 agents = [0]
 n_bursts = 6
