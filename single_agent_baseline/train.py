@@ -7,7 +7,7 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 
-from common.tracking_env import TrackingEnv
+from tracking_env import TrackingEnv
 
 agents = [0]
 n_bursts = 6
@@ -51,10 +51,7 @@ policies = {
 def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
-
-runtime_env={"working_dir": "./"}
-
-ray.init(runtime_env=runtime_env)
+ray.init()
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
