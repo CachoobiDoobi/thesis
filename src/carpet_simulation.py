@@ -13,7 +13,7 @@ class CarpetSimulation:
     def __init__(self):
         if platform.system() == 'Linux':
             # carpet.read_license("Przlwkofsky")
-            carpet.read_license("/project/carpet3.lcs")
+            carpet.read_license("/project/misc/carpet3.lcs")
         # Processing
         carpet.Processing_DFB = True
         carpet.Processing_MTI = 'no'
