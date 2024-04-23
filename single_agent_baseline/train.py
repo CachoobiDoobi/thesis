@@ -51,8 +51,8 @@ policies = {
 def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
-
-ray.init(runtime_env={"working_dir": "./"})
+ray.init(runtime_env={"working_dir": "/"})
+# ray.init()
 
 config = (
     PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
