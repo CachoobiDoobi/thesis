@@ -3,8 +3,9 @@ import os
 import pprint
 import sys
 import pathlib
+
 logging.error(pathlib.Path(__file__).parent.resolve())
-os.environ['PYTHONPATH'] = '/root/project/common/'
+os.environ['PYTHONPATH'] = 'root:/project/common/'
 
 import ray
 from gymnasium.spaces import Dict, Box, MultiDiscrete
@@ -12,9 +13,6 @@ from ray import tune, air
 from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 from common.tracking_env import TrackingEnv
-
-logging.error(pathlib.Path(__file__).parent.resolve())
-os.environ['PYTHONPATH'] = '/root/project/common/'
 
 agents = [0]
 n_bursts = 6
