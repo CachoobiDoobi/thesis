@@ -26,8 +26,8 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            python3 project/src/single_agent_baseline/train.py;
-            cp -r  /project/src/single_agent_baseline/results /nas-tmp/Radu/baseline;"
+            python3 project/single_agent_baseline/train.py;
+            cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;
           #            poetry self update;

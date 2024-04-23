@@ -27,10 +27,10 @@ spec:
                 --branch main
                 --single-branch
                 project;
-            cd project/src/single_agent_baseline/src;
+            cd project/single_agent_baseline/src;
             python3 test.py;
             cd;
-            cp -r  /project/src/single_agent_baseline/src/results /nas-tmp/Radu/single_agent_baseline;"
+            cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/single_agent_baseline;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;
