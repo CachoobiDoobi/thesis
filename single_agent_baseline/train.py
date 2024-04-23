@@ -9,7 +9,7 @@ from ray.rllib.algorithms import PPOConfig, Algorithm
 from ray.rllib.policy.policy import PolicySpec
 from common.tracking_env import TrackingEnv
 
-sys.path.append('/project/common/')
+os.environ['PYTHONPATH'] = '/project/common'
 
 
 agents = [0]
