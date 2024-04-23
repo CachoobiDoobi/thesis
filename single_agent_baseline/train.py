@@ -14,7 +14,7 @@ if platform.system() == 'Linux':
     sys.path.append(file_dir)
     print(sys.path)
 
-from src.common.tracking_env import TrackingEnv
+from tracking_env import TrackingEnv
 
 agents = [0]
 n_bursts = 6

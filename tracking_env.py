@@ -15,8 +15,8 @@ from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionM
     ConstantVelocity
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
-from src.config import param_dict
-from src.carpet_simulation import CarpetSimulation
+from config import param_dict
+from carpet_simulation import CarpetSimulation
 
 
 class TrackingEnv(MultiAgentEnv):
