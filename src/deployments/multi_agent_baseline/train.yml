@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+
+# https://kubernetes.io/docs/concepts/workloads/controllers/job/
+kind: Job
+metadata:
+  name: train-multi-baseline
+  namespace: gaghir-thesis
+spec:
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 4
+  template:
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+      - name: gaghir-thesis-rtkubtemp
+        persistentVolumeClaim:
+          claimName: gaghir-thesis-rtkubtemp-claim
+      containers:
+      - name: thesis
+        image: gitlab.tsn.tno.nl:4567/gaghir/thesis:latest
+        command:
+          - /bin/bash
+        args:
+          - -c
+          - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
+                --branch main
+                --single-branch
+                project;
+            cd project/src/multi_agent_baseline;
+            python train.py;
+            cd;
+            cp -r  /project/src/multi_agent_baseline/results /nas-tmp/Radu/multi_agent_baseline;"
+#            trap : TERM INT; sleep infinity & wait;"
+          # pyenv install 3.9.0;
+          #            poetry self update;
+          #            poetry lock;
+          #            poetry install;
+        resources:
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          limits:
+            cpu: '50'
+            memory: 50Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '40'
+            memory: 40Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /nas-tmp
+          name: gaghir-thesis-rtkubtemp
+      restartPolicy: Never
+      # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      imagePullSecrets:
+      - name: baseline-image
