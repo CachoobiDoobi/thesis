@@ -52,7 +52,7 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
 
-runtime_env={"working_dir": "/root/project/"}
+runtime_env={"working_dir": "./"}
 
 ray.init(runtime_env=runtime_env)
 
