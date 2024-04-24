@@ -1,5 +1,4 @@
-####### our case #######
-import logging
+
 import math
 import platform
 

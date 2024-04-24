@@ -1,14 +1,11 @@
-import logging
-
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.complex_input_net import ComplexInputNetwork as TorchComplex
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from torch_geometric.nn import GCNConv, global_mean_pool
-from torch.nn import ModuleList, Linear
+from torch.nn import Linear
 
-from utils import build_graphs_from_batch, preprocess_observations
+from utils import preprocess_observations
 
 torch, nn = try_import_torch()
 
@@ -33,7 +30,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # hardcode number of parameters
         self.embedding = Linear(in_features=6, out_features=6).to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        input_size = 30 # equal to action space + EMBEDDINGS
+        input_size = 30  # equal to action space + EMBEDDINGS
         hidden_dim = 128
 
         self.vf = nn.Sequential(
@@ -64,7 +61,8 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     # computes the central value function based on the Joint Observations
     def central_value_function(self, obs, opponent_obs, opponent_actions):
         # restore original shape
-        bursts, observation = preprocess_observations(obs=obs, opponent_obs=opponent_obs, original_obs_space=self.original_obs_space)
+        bursts, observation = preprocess_observations(obs=obs, opponent_obs=opponent_obs,
+                                                      original_obs_space=self.original_obs_space)
         bursts = bursts.to(self.device)
         observation = observation.to(self.device)
         bursts = bursts.reshape(bursts.shape[0], -1)
@@ -75,7 +73,6 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
 
         out = self.vf(x).reshape(-1)
         return out
-
 
     @override(ModelV2)
     def value_function(self):
