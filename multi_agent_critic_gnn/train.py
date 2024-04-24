@@ -101,7 +101,7 @@ tuner = tune.Tuner(
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
                              storage_path=storage,
-                             name="multiagent"),
+                             name="multiagent_cc_7layers"),
 )
 results = tuner.fit()
 

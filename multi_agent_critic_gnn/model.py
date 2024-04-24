@@ -34,22 +34,19 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.relu = nn.PReLU().to(device)
         # hardcode number of parameters
         self.embedding = Linear(in_features=6, out_features=6).to(device)
-        # self.embedding.to(device)
-        self.out = Linear(in_features=6, out_features=1).to(device)
-        # self.out.to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         input_size = 4 + 6 # equal to action space + EMBEDDINGS
-        hidden_dim = 128
+        hidden_dim = 64
 
-        # TODO try with more convs and some varying hidden dim size
         self.convs = ModuleList([
             GCNConv(input_size, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim*2),
+            GCNConv(hidden_dim*2, hidden_dim*4),
+            GCNConv(hidden_dim*4, hidden_dim*2),
+            GCNConv(hidden_dim * 2, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim // 2),
             GCNConv(hidden_dim, 1)
         ]).to(device)
-        # self.convs.to(device)
 
     @override(ModelV2)
     def forward(self, input_dict, state, seq_lens):
@@ -66,7 +63,6 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # build graph here
         loader = build_graphs_from_batch(bursts)
         embeddings = self.embedding(observation)
-        # print(bursts.shape, embeddings.shape)
         # forward
         for batch in loader:
             batch = batch.to(self.device)
@@ -82,10 +78,8 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
                 x = self.relu(x)
                 x = self.dropout(x)
             x = self.convs[-1](x=x, edge_index=edge_index)
-            # use a FC net here
             x = global_mean_pool(x, batch.batch)
-            # x = x.reshape(bursts.shape[0], -1)
-#            x = self.out(x)
+
             return x.reshape(-1)
 
     @override(ModelV2)
