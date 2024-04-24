@@ -45,7 +45,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
             GCNConv(hidden_dim*4, hidden_dim*2),
             GCNConv(hidden_dim * 2, hidden_dim),
             GCNConv(hidden_dim, hidden_dim // 2),
-            GCNConv(hidden_dim, 1)
+            GCNConv(hidden_dim//2, 1)
         ]).to(device)
 
     @override(ModelV2)
