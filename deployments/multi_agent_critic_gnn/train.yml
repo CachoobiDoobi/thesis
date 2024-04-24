@@ -28,9 +28,9 @@ spec:
                 --single-branch
                 project;
             cd project;
-            python3 -m multi_agent_critic.train.py;
+            python3 -m multi_agent_critic_gnn.train.py;
             cd;
-            cp -r  /project/multi_agent_critic/results /nas-tmp/Radu/multi;"
+            cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/multi;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;

@@ -41,6 +41,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         input_size = 4 + 6 # equal to action space + EMBEDDINGS
         hidden_dim = 128
 
+        # TODO try with more convs and some varying hidden dim size
         self.convs = ModuleList([
             GCNConv(input_size, hidden_dim),
             GCNConv(hidden_dim, hidden_dim),

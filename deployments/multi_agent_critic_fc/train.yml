@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: test-multi-baseline
+  name: train-cc
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -28,9 +28,9 @@ spec:
                 --single-branch
                 project;
             cd project;
-            python3 -m multi_agent_critic_gnn.test.py;
+            python3 -m multi_agent_critic_fc.train.py;
             cd;
-            cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/multi_agent_baseline;"
+            cp -r  /project/multi_agent_critic_fc/results /nas-tmp/Radu/cc_fc;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;
