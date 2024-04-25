@@ -71,7 +71,7 @@ stop = {
     # "episodes_total": 900
 }
 
-storage = os.path.abspath("results")
+storage = 'project/single_agent_baseline/results'
 
 results = tune.Tuner(
     "PPO",

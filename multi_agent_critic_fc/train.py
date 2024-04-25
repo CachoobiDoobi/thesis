@@ -94,7 +94,7 @@ stop = {
     "time_total_s": 3600 * 18
 }
 
-storage = os.path.abspath("results")
+storage = '/project/multi_agent_critic_fc/results'
 
 tuner = tune.Tuner(
     CentralizedCritic,

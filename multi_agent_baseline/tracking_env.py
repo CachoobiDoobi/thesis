@@ -261,7 +261,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, 'results/probability_of_detection.pdf')
+        pio.write_image(fig1, '/project/multi_agent_baseline/results/probability_of_detection.pdf')
 
         # Create Plotly figure for the second plot (Waveform duration ratio)
         fig2 = go.Figure()
@@ -273,7 +273,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the second plot to a file
-        pio.write_image(fig2, 'results/waveform_duration_ratio.pdf')
+        pio.write_image(fig2, '/project/multi_agent_baseline/results/waveform_duration_ratio.pdf')
 
         track = carpet.firm_track_probability(self.pds)
         fig3 = go.Figure()
@@ -285,4 +285,113 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Probability"
         )
         # Save the second plot to a file
-        pio.write_image(fig3, 'results/firm_track_prob.pdf')
+        pio.write_image(fig3, '/project/multi_agent_baseline/results/firm_track_prob.pdf')
+
+    def render_with_variance(self, pds, ratios, track_probs):
+
+            x = np.arange(self.timestep_limit)
+            pds_var = np.var(pds, axis=1)
+            ratios_var = np.var(ratios, axis=1)
+            track_probs_var = np.var(track_probs, axis=1)
+
+            pds = np.mean(pds, axis=1)
+            ratios = np.mean(ratios, axis=1)
+            track_probs = np.mean(track_probs, axis=1)
+
+            # Create Plotly figure for the first plot (Probability of detection)
+            fig1 = go.Figure()
+            fig1.add_trace(
+                go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
+            # Add upper bound for variance
+            fig1.add_trace(go.Scatter(
+                x=x,
+                y=pds + pds_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                name='Variance'
+            ))
+
+            # Add lower bound for variance
+            fig1.add_trace(go.Scatter(
+                x=x,
+                y=pds - pds_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                showlegend=False
+            ))
+            fig1.update_layout(
+                title="Probability of Detection",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+            # Save the first plot to a file
+            pio.write_image(fig1, '/project/multi_agent_baseline/results/probability_of_detection.pdf')
+
+            # Create Plotly figure for the second plot (Waveform duration ratio)
+            fig2 = go.Figure()
+            fig2.add_trace(
+                go.Scatter(x=x, y=ratios, mode='lines', name='Waveform duration ratio'))
+            fig2.update_layout(
+                title="Waveform Duration Ratio",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+            # Add upper bound for variance
+            fig2.add_trace(go.Scatter(
+                x=x,
+                y=ratios + ratios_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                name='Variance'
+            ))
+
+            # Add lower bound for variance
+            fig2.add_trace(go.Scatter(
+                x=x,
+                y=ratios - ratios_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                showlegend=False
+            ))
+            # Save the second plot to a file
+            pio.write_image(fig2, '/project/multi_agent_baseline/results/waveform_duration_ratio.pdf')
+
+            fig3 = go.Figure()
+            fig3.add_trace(
+                go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
+            # Add upper bound for variance
+            fig3.add_trace(go.Scatter(
+                x=x,
+                y=track_probs + track_probs_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                name='Variance'
+            ))
+
+            # Add lower bound for variance
+            fig3.add_trace(go.Scatter(
+                x=x,
+                y=track_probs - track_probs_var,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor='rgba(0,100,80,0.2)',
+                showlegend=False
+            ))
+            fig3.update_layout(
+                title="Tracking probability",
+                xaxis_title="Time",
+                yaxis_title="Probability"
+            )
+            # Save the second plot to a file
+            pio.write_image(fig3, '/project/multi_agent_baseline/results/firm_track_prob.pdf')
