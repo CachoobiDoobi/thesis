@@ -446,7 +446,7 @@ class TrackingEnv(MultiAgentEnv):
         fig1.add_trace(
             go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
         # Add error bars to represent variance
-        fig1.add_trace(go.Scatter(
+        fig1.add_trace(go.Bar(
             x=x,
             y=pds,
             error_y=dict(
@@ -457,8 +457,6 @@ class TrackingEnv(MultiAgentEnv):
                 thickness=0,
                 width=0
             ),
-            mode='markers',
-            marker=dict(color='rgba(0,100,80,0.2)'),
             showlegend=False
         ))
         fig1.update_layout(
@@ -478,7 +476,7 @@ class TrackingEnv(MultiAgentEnv):
             xaxis_title="Time",
             yaxis_title="Value"
         )
-        fig1.add_trace(go.Scatter(
+        fig2.add_trace(go.Bar(
             x=x,
             y=ratios,
             error_y=dict(
@@ -489,8 +487,6 @@ class TrackingEnv(MultiAgentEnv):
                 thickness=0,
                 width=0
             ),
-            mode='markers',
-            marker=dict(color='rgba(0,100,80,0.2)'),
             showlegend=False
         ))
         # Save the second plot to a file
@@ -499,7 +495,7 @@ class TrackingEnv(MultiAgentEnv):
         fig3 = go.Figure()
         fig3.add_trace(
             go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
-        fig1.add_trace(go.Scatter(
+        fig3.add_trace(go.Bar(
             x=x,
             y=track_probs,
             error_y=dict(
@@ -509,10 +505,7 @@ class TrackingEnv(MultiAgentEnv):
                 color='rgba(0,100,80,0.2)',
                 thickness=0,
                 width=0
-            ),
-            mode='markers',
-            marker=dict(color='rgba(0,100,80,0.2)'),
-            showlegend=False
+            ), showlegend=False
         ))
         fig3.update_layout(
             title="Tracking probability",
