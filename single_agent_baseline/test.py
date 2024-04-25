@@ -73,4 +73,4 @@ for _ in range(100):
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
 
-env.render_with_variance()
+env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
