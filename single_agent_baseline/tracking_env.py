@@ -318,7 +318,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, 'results/probability_of_detection.pdf')
+        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
 
         # Create Plotly figure for the second plot (Waveform duration ratio)
         fig2 = go.Figure()
@@ -339,7 +339,7 @@ class TrackingEnv(MultiAgentEnv):
             name='Variance'
         ))
         # Save the second plot to a file
-        pio.write_image(fig2, 'results/waveform_duration_ratio.pdf')
+        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
 
         fig3 = go.Figure()
         fig3.add_trace(
@@ -359,4 +359,4 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Probability"
         )
         # Save the second plot to a file
-        pio.write_image(fig3, 'results/firm_track_prob.pdf')
+        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
