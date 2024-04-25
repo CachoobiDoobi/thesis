@@ -457,6 +457,7 @@ class TrackingEnv(MultiAgentEnv):
                 thickness=0,
                 width=0
             ),
+            offset=0,
             showlegend=False
         ))
         fig1.update_layout(
@@ -487,6 +488,7 @@ class TrackingEnv(MultiAgentEnv):
                 thickness=0,
                 width=0
             ),
+            offset=0,
             showlegend=False
         ))
         # Save the second plot to a file
@@ -505,7 +507,9 @@ class TrackingEnv(MultiAgentEnv):
                 color='rgba(0,100,80,0.2)',
                 thickness=0,
                 width=0
-            ), showlegend=False
+            ),
+            offset=0,
+            showlegend=False
         ))
         fig3.update_layout(
             title="Tracking probability",
