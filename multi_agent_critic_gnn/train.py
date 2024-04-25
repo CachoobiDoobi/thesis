@@ -94,7 +94,7 @@ stop = {
     # "time_total_s": 3600 * 18
 }
 
-storage = '/project/multi_agent_critic_gnn_/results'
+storage = '/project/multi_agent_critic_gnn/results'
 
 tuner = tune.Tuner(
     CentralizedCritic,
