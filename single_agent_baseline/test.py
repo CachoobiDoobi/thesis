@@ -48,7 +48,7 @@ env = TrackingEnv(env_config=env_config)
 pds = []
 ratios = []
 track = []
-for _ in range(100):
+for _ in range(1000):
 
     obs, _ = env.reset()
 
