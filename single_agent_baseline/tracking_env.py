@@ -305,14 +305,26 @@ class TrackingEnv(MultiAgentEnv):
         fig1 = go.Figure()
         fig1.add_trace(
             go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
-        # Add the area around the line indicating variance
+        # Add upper bound for variance
         fig1.add_trace(go.Scatter(
-            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
-            y=np.concatenate([pds - pds_var, (pds + pds_var)[::-1]]),  # upper, then lower reversed
-            fill='toself',
+            x=x,
+            y=pds + pds_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
             fillcolor='rgba(0,100,80,0.2)',
-            line=dict(color='rgba(255,255,255,0)'),
             name='Variance'
+        ))
+
+        # Add lower bound for variance
+        fig1.add_trace(go.Scatter(
+            x=x,
+            y=pds - pds_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(0,100,80,0.2)',
+            showlegend=False
         ))
         fig1.update_layout(
             title="Probability of Detection",
@@ -331,14 +343,26 @@ class TrackingEnv(MultiAgentEnv):
             xaxis_title="Time",
             yaxis_title="Value"
         )
-        # Add the area around the line indicating variance
+        # Add upper bound for variance
         fig2.add_trace(go.Scatter(
-            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
-            y=np.concatenate([ratios - ratios_var, (ratios + ratios_var)[::-1]]),  # upper, then lower reversed
-            fill='toself',
+            x=x,
+            y=ratios + ratios_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
             fillcolor='rgba(0,100,80,0.2)',
-            line=dict(color='rgba(255,255,255,0)'),
             name='Variance'
+        ))
+
+        # Add lower bound for variance
+        fig2.add_trace(go.Scatter(
+            x=x,
+            y=ratios - ratios_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(0,100,80,0.2)',
+            showlegend=False
         ))
         # Save the second plot to a file
         pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
@@ -346,14 +370,26 @@ class TrackingEnv(MultiAgentEnv):
         fig3 = go.Figure()
         fig3.add_trace(
             go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
+        # Add upper bound for variance
         fig3.add_trace(go.Scatter(
-            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
-            y=np.concatenate([track_probs - track_probs_var, (track_probs + track_probs_var)[::-1]]),
-            # upper, then lower reversed
-            fill='toself',
+            x=x,
+            y=track_probs + track_probs_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
             fillcolor='rgba(0,100,80,0.2)',
-            line=dict(color='rgba(255,255,255,0)'),
             name='Variance'
+        ))
+
+        # Add lower bound for variance
+        fig3.add_trace(go.Scatter(
+            x=x,
+            y=track_probs - track_probs_var,
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(0,100,80,0.2)',
+            showlegend=False
         ))
         fig3.update_layout(
             title="Tracking probability",
@@ -426,95 +462,5 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
 
-        # Save the second plot to a file
-        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
-
-
-    def render_with_bars(self, pds, ratios, track_probs):
-
-        x = np.arange(self.timestep_limit)
-        pds_var = np.var(pds, axis=1)
-        ratios_var = np.var(ratios, axis=1)
-        track_probs_var = np.var(track_probs, axis=1)
-
-        pds = np.mean(pds, axis=1)
-        ratios = np.mean(ratios, axis=1)
-        track_probs = np.mean(track_probs, axis=1)
-
-        # Create Plotly figure for the first plot (Probability of detection)
-        fig1 = go.Figure()
-        fig1.add_trace(
-            go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
-        # Add error bars to represent variance
-        fig1.add_trace(go.Bar(
-            x=x,
-            y=pds,
-            error_y=dict(
-                type='data',
-                array=pds_var,
-                visible=True,
-                color='rgba(0,100,80,0.2)',
-                thickness=0,
-                width=0
-            ),
-            offset=0,
-            showlegend=False
-        ))
-        fig1.update_layout(
-            title="Probability of Detection",
-            xaxis_title="Time",
-            yaxis_title="Value"
-        )
-        # Save the first plot to a file
-        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
-
-        # Create Plotly figure for the second plot (Waveform duration ratio)
-        fig2 = go.Figure()
-        fig2.add_trace(
-            go.Scatter(x=x, y=ratios, mode='lines', name='Waveform duration ratio'))
-        fig2.update_layout(
-            title="Waveform Duration Ratio",
-            xaxis_title="Time",
-            yaxis_title="Value"
-        )
-        fig2.add_trace(go.Bar(
-            x=x,
-            y=ratios,
-            error_y=dict(
-                type='data',
-                array=ratios_var,
-                visible=True,
-                color='rgba(0,100,80,0.2)',
-                thickness=0,
-                width=0
-            ),
-            offset=0,
-            showlegend=False
-        ))
-        # Save the second plot to a file
-        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
-
-        fig3 = go.Figure()
-        fig3.add_trace(
-            go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
-        fig3.add_trace(go.Bar(
-            x=x,
-            y=track_probs,
-            error_y=dict(
-                type='data',
-                array=track_probs_var,
-                visible=True,
-                color='rgba(0,100,80,0.2)',
-                thickness=0,
-                width=0
-            ),
-            offset=0,
-            showlegend=False
-        ))
-        fig3.update_layout(
-            title="Tracking probability",
-            xaxis_title="Time",
-            yaxis_title="Probability"
-        )
         # Save the second plot to a file
         pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
