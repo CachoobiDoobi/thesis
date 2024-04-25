@@ -64,7 +64,7 @@ for _ in range(100):
         parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
 
         actions = {0: parameters_1}
-        print(f"Parameters: {None} given observation at previous timestep: {obs}")
+        # print(f"Parameters: {None} given observation at previous timestep: {obs}")
         obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
         done = terminateds["__all__"]
