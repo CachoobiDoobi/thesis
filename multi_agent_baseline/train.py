@@ -79,7 +79,7 @@ stop = {
     # "episodes_total": 900
 }
 
-storage = 'project/multi_agent_baseline/results'
+storage = '/project/multi_agent_baseline/results'
 
 results = tune.Tuner(
     "PPO",
