@@ -49,7 +49,7 @@ pds = []
 ratios = []
 track = []
 
-num_iterations = 100
+num_iterations = 1000
 for _ in range(num_iterations):
 
     obs, _ = env.reset()
