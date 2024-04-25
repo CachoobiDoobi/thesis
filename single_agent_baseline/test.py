@@ -5,28 +5,28 @@ from ray.rllib.algorithms import Algorithm
 
 from tracking_env import TrackingEnv
 
-n_bursts = 3
+agents = [0]
+n_bursts = 6
 
 action_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
-     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts)})
+     'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
+     'RF': MultiDiscrete(nvec=[2] * n_bursts),
+     })
 observation_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
+     'RF': MultiDiscrete(nvec=[2] * n_bursts),
      'PD': Box(low=0, high=1),
      'ratio': Box(low=0, high=100),
      'r_hat': Box(low=0, high=1e5),
      'v_hat': Box(low=0, high=1e3),
      'v_wind': Box(low=0, high=40),
      'alt': Box(low=10, high=30)
-     })
-
-# action_space = gymnasium.spaces.utils.flatten_space(action_space)
-# observation_space = gymnasium.spaces.utils.flatten_space(observation_space)
-
-agents = [0]
+     }
+)
 
 env_config = {
     "ts": 20,
