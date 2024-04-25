@@ -75,4 +75,5 @@ for _ in range(num_iterations):
     track.append(carpet.firm_track_probability(env.pds))
 
 # env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
-env.render_points(pds=pds, ratios=ratios, track_probs=track, num_iterations=num_iterations)
+# env.render_points(pds=pds, ratios=ratios, track_probs=track, num_iterations=num_iterations)
+env.render_with_bars(pds=pds, ratios=ratios, track_probs=track)

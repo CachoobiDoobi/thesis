@@ -252,6 +252,7 @@ class TrackingEnv(MultiAgentEnv):
             # TODO gate or not gate?
             return {0: reward_pd + reward_time}
 
+    # TODO keep render, add a mode param, move functionality to utils
     def render(self):
         # Create Plotly figure for the first plot (Probability of detection)
         fig1 = go.Figure()
@@ -425,5 +426,98 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
 
+        # Save the second plot to a file
+        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
+
+
+    def render_with_bars(self, pds, ratios, track_probs):
+
+        x = np.arange(self.timestep_limit)
+        pds_var = np.var(pds, axis=1)
+        ratios_var = np.var(ratios, axis=1)
+        track_probs_var = np.var(track_probs, axis=1)
+
+        pds = np.mean(pds, axis=1)
+        ratios = np.mean(ratios, axis=1)
+        track_probs = np.mean(track_probs, axis=1)
+
+        # Create Plotly figure for the first plot (Probability of detection)
+        fig1 = go.Figure()
+        fig1.add_trace(
+            go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
+        # Add error bars to represent variance
+        fig1.add_trace(go.Scatter(
+            x=x,
+            y=pds,
+            error_y=dict(
+                type='data',
+                array=pds_var,
+                visible=True,
+                color='rgba(0,100,80,0.2)',
+                thickness=0,
+                width=0
+            ),
+            mode='markers',
+            marker=dict(color='rgba(0,100,80,0.2)'),
+            showlegend=False
+        ))
+        fig1.update_layout(
+            title="Probability of Detection",
+            xaxis_title="Time",
+            yaxis_title="Value"
+        )
+        # Save the first plot to a file
+        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
+
+        # Create Plotly figure for the second plot (Waveform duration ratio)
+        fig2 = go.Figure()
+        fig2.add_trace(
+            go.Scatter(x=x, y=ratios, mode='lines', name='Waveform duration ratio'))
+        fig2.update_layout(
+            title="Waveform Duration Ratio",
+            xaxis_title="Time",
+            yaxis_title="Value"
+        )
+        fig1.add_trace(go.Scatter(
+            x=x,
+            y=ratios,
+            error_y=dict(
+                type='data',
+                array=ratios_var,
+                visible=True,
+                color='rgba(0,100,80,0.2)',
+                thickness=0,
+                width=0
+            ),
+            mode='markers',
+            marker=dict(color='rgba(0,100,80,0.2)'),
+            showlegend=False
+        ))
+        # Save the second plot to a file
+        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+
+        fig3 = go.Figure()
+        fig3.add_trace(
+            go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
+        fig1.add_trace(go.Scatter(
+            x=x,
+            y=track_probs,
+            error_y=dict(
+                type='data',
+                array=track_probs_var,
+                visible=True,
+                color='rgba(0,100,80,0.2)',
+                thickness=0,
+                width=0
+            ),
+            mode='markers',
+            marker=dict(color='rgba(0,100,80,0.2)'),
+            showlegend=False
+        ))
+        fig3.update_layout(
+            title="Tracking probability",
+            xaxis_title="Time",
+            yaxis_title="Probability"
+        )
         # Save the second plot to a file
         pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
