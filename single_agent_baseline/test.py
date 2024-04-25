@@ -1,4 +1,5 @@
 import ray
+from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
 
@@ -44,26 +45,32 @@ agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
 
 env = TrackingEnv(env_config=env_config)
+pds = []
+ratios = []
+track = []
+for _ in range(100):
 
-obs, _ = env.reset()
+    obs, _ = env.reset()
 
-env.wind_speed = 40
+    env.wind_speed = 40
 
-env.altitude = 10
+    env.altitude = 10
 
-env.rcs = 3
+    env.rcs = 3
 
-env.rainfall_rate = 2.7 * 10e-7
+    env.rainfall_rate = 2.7 * 10e-7
+    done = False
+    while not done:
+        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+        parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 
-done = False
-while not done:
-    parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-    parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
+        actions = {0: parameters_1, 1: parameters_2}
+        print(f"Parameters: {None} given observation at previous timestep: {obs}")
+        obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
-    actions = {0: parameters_1, 1: parameters_2}
-    print(f"Parameters: {None} given observation at previous timestep: {obs}")
-    obs, rewards, terminateds, truncateds, _ = env.step(actions)
+        done = terminateds["__all__"]
+    pds.append(env.pds)
+    ratios.append(env.ratios)
+    track.append(carpet.firm_track_probability(env.pds))
 
-    done = terminateds["__all__"]
-
-env.render()
+env.render_with_variance()
