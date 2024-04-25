@@ -48,7 +48,9 @@ env = TrackingEnv(env_config=env_config)
 pds = []
 ratios = []
 track = []
-for _ in range(1000):
+
+num_iterations = 100
+for _ in range(num_iterations):
 
     obs, _ = env.reset()
 
@@ -72,4 +74,5 @@ for _ in range(1000):
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
 
-env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
+# env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
+env.render_points(pds=pds, ratios=ratios, track_probs=track, num_iterations=num_iterations)

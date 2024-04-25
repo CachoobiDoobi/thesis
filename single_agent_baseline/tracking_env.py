@@ -7,6 +7,7 @@ from typing import Optional
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
+import plotly.express as px
 from carpet import carpet
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict, MultiEnvDict
@@ -358,5 +359,71 @@ class TrackingEnv(MultiAgentEnv):
             xaxis_title="Time",
             yaxis_title="Probability"
         )
+        # Save the second plot to a file
+        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
+
+
+    def render_points(self, pds, ratios, track_probs, num_iterations=100):
+
+        pds = np.array(pds).reshape(-1)
+
+        data_pds = {
+            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
+            'y': pds,
+            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
+        }
+
+        # Create scatter plot with Plotly Express
+        fig1 = px.scatter(data_pds, x='x', y='y', color='iteration',
+                         title='Probability of detection',
+                         labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+
+        fig1.update_layout(
+            title="Probability of Detection",
+            xaxis_title="Time",
+            yaxis_title="Value"
+        )
+        # Save the first plot to a file
+        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
+
+        ratios = np.array(ratios).reshape(-1)
+
+        data_ratio = {
+            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
+            'y': ratios,
+            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
+        }
+
+        # Create scatter plot with Plotly Express
+        fig2 = px.scatter(data_ratio, x='x', y='y', color='iteration',
+                          title='Waveform duration ratio',
+                          labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+
+        fig2.update_layout(
+            title="Waveform duration ratio",
+            xaxis_title="Time",
+            yaxis_title="Value"
+        )
+        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+
+        track_probs = np.array(track_probs).reshape(-1)
+
+        data_track = {
+            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
+            'y': track_probs,
+            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
+        }
+
+        # Create scatter plot with Plotly Express
+        fig3 = px.scatter(data_track, x='x', y='y', color='iteration',
+                          title='Firm track probability',
+                          labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+
+        fig3.update_layout(
+            title="Firm track probability",
+            xaxis_title="Time",
+            yaxis_title="Value"
+        )
+
         # Save the second plot to a file
         pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
