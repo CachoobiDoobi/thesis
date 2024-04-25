@@ -129,7 +129,8 @@ class TrackingEnv(MultiAgentEnv):
         alt = self.truth_alt[self.timesteps - 1].state_vector[0]
         alt = alt if alt > 0 else abs(alt)
 
-        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=alt, wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
+        pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=alt,
+                                    wind_speed=self.wind_speed, rcs=self.rcs, rainfall_rate=self.rainfall_rate)
 
         if scnr != 0:
             # print(f"The speed of light {c}, and the scnr{scnr}")
@@ -172,7 +173,7 @@ class TrackingEnv(MultiAgentEnv):
         v_hat = np.float32(np.random.normal(vel, 5, size=(1,)) if self.timesteps == 0 else abs(np.random.normal(vel,
                                                                                                                 abs(vel * self.velocity_uncertainty),
                                                                                                                 size=(
-                                                                                                                1,))))
+                                                                                                                    1,))))
 
         alt_hat = self.truth_alt[self.timesteps - 1].state_vector[0] * np.random.normal(1, 0.25)
         alt_hat = np.array([alt_hat], dtype=np.float32)
@@ -193,7 +194,7 @@ class TrackingEnv(MultiAgentEnv):
             obs[two]['PD'] = np.array([self.pds[-1]], dtype=np.float32) if len(self.pds) > 0 else np.array([0],
                                                                                                            dtype=np.float32)
             obs[two]['ratio'] = np.array([self.ratios[-1]], dtype=np.float32) if len(self.ratios) > 0 else np.array([0],
-                                                                                                   dtype=np.float32)
+                                                                                                                    dtype=np.float32)
         else:
             obs[one] = self.actions[-1][one] if len(self.actions) > 0 else self.observation_space.sample()
         obs[one]['r_hat'] = np.clip(r_hat, a_min=0, a_max=1e5)
@@ -203,7 +204,7 @@ class TrackingEnv(MultiAgentEnv):
         obs[one]['PD'] = np.array([self.pds[-1]], dtype=np.float32) if len(self.pds) > 0 else np.array([0],
                                                                                                        dtype=np.float32)
         obs[one]['ratio'] = np.array([self.ratios[-1]], dtype=np.float32) if len(self.ratios) > 0 else np.array([0],
-                                                                                                                    dtype=np.float32)
+                                                                                                                dtype=np.float32)
         return obs
 
     def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
@@ -287,7 +288,6 @@ class TrackingEnv(MultiAgentEnv):
         # Save the second plot to a file
         pio.write_image(fig3, 'results/firm_track_prob.pdf')
 
-
     def render_with_variance(self, pds, ratios, track_probs):
 
         pds_var = np.var(pds, dim=1)
@@ -345,7 +345,8 @@ class TrackingEnv(MultiAgentEnv):
             go.Scatter(x=np.arange(self.timestep_limit), y=track_probs, mode='lines', name='Tracking probability'))
         fig3.add_trace(go.Scatter(
             x=np.concatenate([self.timestep_limit, self.timestep_limit[::-1]]),  # x, then x reversed
-            y=np.concatenate([track_probs - track_probs_var, (track_probs + track_probs_var)[::-1]]),  # upper, then lower reversed
+            y=np.concatenate([track_probs - track_probs_var, (track_probs + track_probs_var)[::-1]]),
+            # upper, then lower reversed
             fill='toself',
             fillcolor='rgba(0,100,80,0.2)',
             line=dict(color='rgba(255,255,255,0)'),
