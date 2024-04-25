@@ -290,6 +290,7 @@ class TrackingEnv(MultiAgentEnv):
 
     def render_with_variance(self, pds, ratios, track_probs):
 
+        x = np.arange(self.timestep_limit)
         pds_var = np.var(pds, axis=1)
         ratios_var = np.var(ratios, axis=1)
         track_probs_var = np.var(track_probs, axis=1)
@@ -301,10 +302,10 @@ class TrackingEnv(MultiAgentEnv):
         # Create Plotly figure for the first plot (Probability of detection)
         fig1 = go.Figure()
         fig1.add_trace(
-            go.Scatter(x=np.arange(self.timestep_limit), y=pds, mode='lines', name='Probability of detection'))
+            go.Scatter(x=x, y=pds, mode='lines', name='Probability of detection'))
         # Add the area around the line indicating variance
         fig1.add_trace(go.Scatter(
-            x=np.concatenate([self.timestep_limit, self.timestep_limit[::-1]]),  # x, then x reversed
+            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
             y=np.concatenate([pds - pds_var, (pds + pds_var)[::-1]]),  # upper, then lower reversed
             fill='toself',
             fillcolor='rgba(0,100,80,0.2)',
@@ -322,7 +323,7 @@ class TrackingEnv(MultiAgentEnv):
         # Create Plotly figure for the second plot (Waveform duration ratio)
         fig2 = go.Figure()
         fig2.add_trace(
-            go.Scatter(x=np.arange(self.timestep_limit), y=ratios, mode='lines', name='Waveform duration ratio'))
+            go.Scatter(x=x, y=ratios, mode='lines', name='Waveform duration ratio'))
         fig2.update_layout(
             title="Waveform Duration Ratio",
             xaxis_title="Time",
@@ -330,7 +331,7 @@ class TrackingEnv(MultiAgentEnv):
         )
         # Add the area around the line indicating variance
         fig2.add_trace(go.Scatter(
-            x=np.concatenate([self.timestep_limit, self.timestep_limit[::-1]]),  # x, then x reversed
+            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
             y=np.concatenate([ratios - ratios_var, (ratios + ratios_var)[::-1]]),  # upper, then lower reversed
             fill='toself',
             fillcolor='rgba(0,100,80,0.2)',
@@ -342,9 +343,9 @@ class TrackingEnv(MultiAgentEnv):
 
         fig3 = go.Figure()
         fig3.add_trace(
-            go.Scatter(x=np.arange(self.timestep_limit), y=track_probs, mode='lines', name='Tracking probability'))
+            go.Scatter(x=x, y=track_probs, mode='lines', name='Tracking probability'))
         fig3.add_trace(go.Scatter(
-            x=np.concatenate([self.timestep_limit, self.timestep_limit[::-1]]),  # x, then x reversed
+            x=np.concatenate([x, x[::-1]]),  # x, then x reversed
             y=np.concatenate([track_probs - track_probs_var, (track_probs + track_probs_var)[::-1]]),
             # upper, then lower reversed
             fill='toself',
