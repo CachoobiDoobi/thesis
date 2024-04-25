@@ -290,13 +290,13 @@ class TrackingEnv(MultiAgentEnv):
 
     def render_with_variance(self, pds, ratios, track_probs):
 
-        pds_var = np.var(pds, dim=1)
-        ratios_var = np.var(ratios, dim=1)
-        track_probs_var = np.var(track_probs, dim=1)
+        pds_var = np.var(pds, axis=1)
+        ratios_var = np.var(ratios, axis=1)
+        track_probs_var = np.var(track_probs, axis=1)
 
-        pds = np.mean(pds, dim=1)
-        ratios = np.mean(ratios, dim=1)
-        track_probs = np.mean(track_probs, dim=1)
+        pds = np.mean(pds, axis=1)
+        ratios = np.mean(ratios, axis=1)
+        track_probs = np.mean(track_probs, axis=1)
 
         # Create Plotly figure for the first plot (Probability of detection)
         fig1 = go.Figure()
