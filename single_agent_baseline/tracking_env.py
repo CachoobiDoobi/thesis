@@ -399,20 +399,12 @@ class TrackingEnv(MultiAgentEnv):
         pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
 
 
-    def render_points(self, pds, ratios, track_probs, num_iterations=100):
+    def render_hist(self, pds, ratios, track_probs, num_iterations=100):
 
         pds = np.array(pds).reshape(-1)
 
-        data_pds = {
-            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
-            'y': pds,
-            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
-        }
-
         # Create scatter plot with Plotly Express
-        fig1 = px.scatter(data_pds, x='x', y='y', color='iteration',
-                         title='Probability of detection',
-                         labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+        fig1 = px.histogram(pds, x=pds, nbins=20, title='Histogram')
 
         fig1.update_layout(
             title="Probability of Detection",
@@ -424,16 +416,7 @@ class TrackingEnv(MultiAgentEnv):
 
         ratios = np.array(ratios).reshape(-1)
 
-        data_ratio = {
-            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
-            'y': ratios,
-            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
-        }
-
-        # Create scatter plot with Plotly Express
-        fig2 = px.scatter(data_ratio, x='x', y='y', color='iteration',
-                          title='Waveform duration ratio',
-                          labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+        fig2 = px.histogram(ratios, x=ratios, nbins=20, title='Histogram')
 
         fig2.update_layout(
             title="Waveform duration ratio",
@@ -444,16 +427,7 @@ class TrackingEnv(MultiAgentEnv):
 
         track_probs = np.array(track_probs).reshape(-1)
 
-        data_track = {
-            'x': np.tile(np.arange(self.timestep_limit), num_iterations),
-            'y': track_probs,
-            'iteration': np.repeat(np.arange(1, num_iterations + 1), self.timestep_limit)
-        }
-
-        # Create scatter plot with Plotly Express
-        fig3 = px.scatter(data_track, x='x', y='y', color='iteration',
-                          title='Firm track probability',
-                          labels={'x': 'X', 'y': 'Y', 'iteration': 'Iteration'})
+        fig3 = px.histogram(track_probs, x=track_probs, nbins=20, title='Histogram')
 
         fig3.update_layout(
             title="Firm track probability",
