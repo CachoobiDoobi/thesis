@@ -78,4 +78,5 @@ for _ in range(num_iterations):
 # env.render_points(pds=pds, ratios=ratios, track_probs=track, num_iterations=num_iterations)
 # env.render_with_bars(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist(pds=pds, ratios=ratios, track_probs=track)
+env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
 
