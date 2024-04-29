@@ -39,7 +39,7 @@ env_config = {
 
 ray.init()
 
-cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_aa42b_00000_0_2024-04-22_15-40-37/checkpoint_000000'
+cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_a85c3_00000_0_2024-04-28_12-05-51\checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
