@@ -41,7 +41,6 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
 
 
 def build_graphs_from_batch(bursts):
-    # TODO build radar-informed graph
     batch_size, n_bursts, _ = bursts.shape
 
     # Function to calculate dissimilarity between bursts
@@ -69,7 +68,6 @@ def build_graphs_from_batch(bursts):
         for i, node1 in enumerate(graph.nodes()):
             for j, node2 in enumerate(graph.nodes()):
                 if node1 != node2:  # No self-loops
-                    # TODO compute it using PRF and pulse duration only
                     similarity = calculate_similarity(graph.nodes[node1]['param'], graph.nodes[node2]['param'])
                     disim_matrix[i, j] = 1 - similarity
         disim_matrix = disim_matrix / np.max(disim_matrix)

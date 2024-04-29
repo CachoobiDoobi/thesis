@@ -32,7 +32,6 @@ observation_space = Dict(
      }
 )
 
-# TODO test if we made this much longer
 env_config = {
     "ts": 20,
     'agents': agents,
@@ -95,11 +94,11 @@ env = TrackingEnv(env_config=config["env_config"])
 
 obs, _ = env.reset()
 
-env.wind_speed = 10
+env.wind_speed = 40
 
 env.altitude = 10
 
-env.rcs = 3
+env.rcs = 1
 
 env.rainfall_rate = 2.7 * 10e-7
 

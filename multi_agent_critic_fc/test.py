@@ -66,7 +66,7 @@ for _ in range(num_iterations):
 
     env.altitude = 10
 
-    env.rcs = 3
+    env.rcs = 1
 
     env.rainfall_rate = 2.7 * 10e-7
     done = False

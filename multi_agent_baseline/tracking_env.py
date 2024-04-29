@@ -107,7 +107,7 @@ class TrackingEnv(MultiAgentEnv):
 
         self.rcs = np.random.uniform(1, 10)
 
-        self.rainfall_rate = np.random.uniform(0, 2.8) * 10e-7
+        self.rainfall_rate = np.random.uniform(0, 2.8) * 1e-6
 
         return self._get_obs(), {}
 
@@ -247,7 +247,6 @@ class TrackingEnv(MultiAgentEnv):
         if len(self.agent_ids) > 1:
             return {0: reward_pd, 1: reward_time}
         else:
-            # TODO gate or not gate?
             return {0: reward_pd + reward_time}
 
     def render(self):

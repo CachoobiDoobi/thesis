@@ -11,8 +11,6 @@ from ray.rllib.utils.torch_utils import convert_to_torch_tensor, explained_varia
 
 torch, nn = try_import_torch()
 
-# TODO make this for multiple agents, cooperative game
-
 OPPONENT_OBS = "opponent_obs"
 OPPONENT_ACTION = "opponent_action"
 

@@ -247,7 +247,6 @@ class TrackingEnv(MultiAgentEnv):
         if len(self.agent_ids) > 1:
             return {0: reward_pd, 1: reward_time}
         else:
-            # TODO gate or not gate?
             return {0: reward_pd + reward_time}
 
     def render(self):

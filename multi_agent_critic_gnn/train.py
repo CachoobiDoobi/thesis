@@ -59,7 +59,7 @@ config = (
     .experimental(_enable_new_api_stack=False)
     .environment(TrackingEnv, env_config=env_config, clip_actions=True, disable_env_checking=True)
     .framework('torch')
-    .rollouts(batch_mode="complete_episodes", num_rollout_workers=20)
+    .rollouts(batch_mode="complete_episodes", num_rollout_workers=2)
     .training(model={"custom_model": "cc_model"})
     .multi_agent(
         policies={
@@ -83,15 +83,15 @@ config = (
         else "pol2",
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    .resources(num_gpus=1, num_cpus_per_worker=2)
+    .resources(num_gpus=0, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
 )
 
 stop = {
-    # "training_iteration": 1,
+    "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 18
+    # "time_total_s": 3600 * 18
 }
 
 storage = '/project/multi_agent_critic_gnn/results'
@@ -123,11 +123,11 @@ env = TrackingEnv(env_config=config["env_config"])
 
 obs, _ = env.reset()
 
-env.wind_speed = 10
+env.wind_speed = 40
 
 env.altitude = 10
 
-env.rcs = 3
+env.rcs = 1
 
 env.rainfall_rate = 2.7 * 10e-7
 
