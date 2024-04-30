@@ -2,7 +2,9 @@ import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
+from ray.rllib.models import ModelCatalog
 
+from multi_agent_critic_fc.model import TorchCentralizedCriticModel
 from tracking_env import TrackingEnv
 
 n_bursts = 3
@@ -39,11 +41,11 @@ env_config = {
 
 ray.init()
 
-# ModelCatalog.register_custom_model(
-#     "cc_model",
-#     TorchCentralizedCriticModel
-#
-# )
+ModelCatalog.register_custom_model(
+    "cc_model",
+    TorchCentralizedCriticModel
+
+)
 
 cdir = '/nas-tmp/Radu/cc_fc/results/multiagent_cc_fc/CentralizedCritic_TrackingEnv_a50e2_00000_0_2024-04-29_08-51-18/checkpoint_000000'
 
