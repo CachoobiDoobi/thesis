@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: test-cc
+  name: test-cc-fc
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100

@@ -2,9 +2,7 @@ import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
-from ray.rllib.models import ModelCatalog
 
-from model import TorchCentralizedCriticModel
 from tracking_env import TrackingEnv
 
 n_bursts = 3
