@@ -89,10 +89,11 @@ rcs = np.linspace(1, 20, num=20)
 wind_speed = np.linspace(start=0, stop=40, num=20)
 rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
 
-num_iterations = 1
+num_iterations = 10
 
 for i, r in enumerate(rcs):
     for j, w in enumerate(wind_speed):
+        print(r, w)
         for _ in range(num_iterations):
 
             obs, _ = env.reset()
@@ -100,6 +101,10 @@ for i, r in enumerate(rcs):
             env.wind_speed = w
 
             env.rcs = r
+
+            env.rainfall_rate = 2.7 * 10e-7
+
+            env.altitude = 10
 
             done = False
             while not done:

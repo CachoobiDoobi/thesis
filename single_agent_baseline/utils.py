@@ -98,7 +98,7 @@ def plot_heatmaps(pds, ratios, track):
     heatmap = go.Heatmap(z=pds)
 
     layout = go.Layout(
-        title='RCS vs Wind Speed',
+        title='PD',
         xaxis=dict(title='Wind Speed'),
         yaxis=dict(title='Radar Cross Section')
     )
@@ -108,3 +108,33 @@ def plot_heatmaps(pds, ratios, track):
 
     # Save the first plot to a file
     pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_pd.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=ratios)
+
+    layout = go.Layout(
+        title='Waveform Duration Ratio',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig2 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_ratios.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=track)
+
+    layout = go.Layout(
+        title='Firm Track Probability',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig3 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig3, '/project/single_agent_baseline/results/heatmap_track.pdf')
