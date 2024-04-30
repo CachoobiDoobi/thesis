@@ -50,7 +50,7 @@ def build_graphs_from_batch(bursts):
     def calculate_similarity(burst1, burst2):
         # print(burst1, burst2)
         burst1 = np.array([burst1[0], burst1[1], burst1[3]])
-        burst2 = np.array([burst2[0], burst2[1], burst1[3]])
+        burst2 = np.array([burst2[0], burst2[1], burst2[3]])
         # print(f'bursts: {burst1, burst2}')
         if np.any(burst1) and np.any(burst2):
             # cosine similarity
