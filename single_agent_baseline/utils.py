@@ -5,7 +5,9 @@ from numpy.linalg import norm
 from ray.rllib.models.modelv2 import restore_original_dimensions
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
+import plotly.graph_objs as go
 
+import plotly.io as pio
 
 def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = restore_original_dimensions(obs=obs, obs_space=original_obs_space, tensorlib="torch")
@@ -89,3 +91,20 @@ def build_graphs_from_batch(bursts):
 
     return DataLoader(data_list, batch_size=batch_size,
                       shuffle=True)  # torch.cat(nodes, dim=0), torch.cat(edges, dim=0) #Batch.from_data_list(data_list)
+
+
+def plot_heatmaps(pds, ratios, track):
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=pds)
+
+    layout = go.Layout(
+        title='RCS vs Wind Speed',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig1 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_pd.pdf')

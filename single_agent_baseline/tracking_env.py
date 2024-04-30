@@ -407,15 +407,13 @@ class TrackingEnv(MultiAgentEnv):
         bin_width = 2 * iqr / (len(pds) ** (1 / 3))  # Freedman-Diaconis rule
         num_bins = int(np.ceil((np.max(pds) - np.min(pds)) / bin_width))
 
-
-
         # Create scatter plot with Plotly Express
-        fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='probability density')
+        fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='percent')
 
         fig1.update_layout(
-            title="Probability of Detection",
-            xaxis_title="Time",
-            yaxis_title="Value"
+            title="Probability of Detection Ditribution",
+            xaxis_title="Probability",
+            yaxis_title="Normalized count"
         )
         # Save the first plot to a file
         pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
@@ -427,12 +425,12 @@ class TrackingEnv(MultiAgentEnv):
         bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
         num_bins = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
 
-        fig2 = px.histogram(ratios, x=ratios, nbins=num_bins, title='Histogram', histnorm='probability density')
+        fig2 = px.histogram(ratios, x=ratios, nbins=num_bins, title='Histogram', histnorm='percent')
 
         fig2.update_layout(
-            title="Waveform duration ratio",
-            xaxis_title="Time",
-            yaxis_title="Value"
+            title="Waveform duration ratio distribution",
+            xaxis_title="Duration ratio",
+            yaxis_title="Normalized count"
         )
         pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
 
@@ -443,12 +441,12 @@ class TrackingEnv(MultiAgentEnv):
         bin_width = 2 * iqr / (len(track_probs) ** (1 / 3))  # Freedman-Diaconis rule
         num_bins = int(np.ceil((np.max(track_probs) - np.min(track_probs)) / bin_width))
 
-        fig3 = px.histogram(track_probs, x=track_probs, nbins=num_bins, title='Histogram', histnorm='probability density')
+        fig3 = px.histogram(track_probs, x=track_probs, nbins=num_bins, title='Histogram', histnorm='percent')
 
         fig3.update_layout(
-            title="Firm track probability",
-            xaxis_title="Time",
-            yaxis_title="Value"
+            title="Firm track probability distribution",
+            xaxis_title="Probability",
+            yaxis_title="Normalized count"
         )
 
         # Save the second plot to a file
@@ -465,12 +463,12 @@ class TrackingEnv(MultiAgentEnv):
         num_bins = int(np.ceil((np.max(pds) - np.min(pds)) / bin_width))
 
         # Create scatter plot with Plotly Express
-        fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='probability density')
+        fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='percent')
 
         fig1.update_layout(
             title="Probability of Detection (Filtered)",
-            xaxis_title="Time",
-            yaxis_title="Value"
+            xaxis_title="Probability",
+            yaxis_title="Normalized count"
         )
         # Save the first plot to a file
         pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection_filtered.pdf')
@@ -500,12 +498,12 @@ class TrackingEnv(MultiAgentEnv):
         num_bins = int(np.ceil((np.max(track_probs) - np.min(track_probs)) / bin_width))
 
         fig3 = px.histogram(track_probs, x=track_probs, nbins=num_bins, title='Histogram',
-                            histnorm='probability density')
+                            histnorm='percent')
 
         fig3.update_layout(
             title="Firm track probability (filtered)",
-            xaxis_title="Time",
-            yaxis_title="Value"
+            xaxis_title="Probability",
+            yaxis_title="Normalized count"
         )
 
         # Save the second plot to a file
