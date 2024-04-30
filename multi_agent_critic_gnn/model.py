@@ -37,7 +37,8 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         input_size = 4 + 6 # equal to action space + EMBEDDINGS
         hidden_dim = 64
-
+        # TODO Add shared encoder for all nodes
+        # TODO hierarchical pooling
         self.convs = ModuleList([
             GCNConv(input_size, hidden_dim),
             GCNConv(hidden_dim, hidden_dim*2),

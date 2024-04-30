@@ -47,7 +47,7 @@ ray.init()
 #
 # )
 
-cdir = '/nas-tmp/Radu/multi/results/multiagent/CentralizedCritic_MultiAgentTrackingEnv_522d5_00000_0_2024-04-19_17-36-14/checkpoint_000000'
+cdir = '/nas-tmp/Radu/multi/results/multiagent_cc_fc/CentralizedCritic_TrackingEnv_a50e2_00000_0_2024-04-29_08-51-18/checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
@@ -83,4 +83,5 @@ for _ in range(num_iterations):
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
 
-env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
+env.render_hist(pds=pds, ratios=ratios, track_probs=track)
+env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)

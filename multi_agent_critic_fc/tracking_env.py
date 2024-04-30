@@ -14,7 +14,7 @@ from scipy.constants import c
 from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, \
     ConstantVelocity
 from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
-
+import plotly.express as px
 from carpet_simulation import CarpetSimulation
 from config import param_dict
 
@@ -394,3 +394,115 @@ class TrackingEnv(MultiAgentEnv):
             )
             # Save the second plot to a file
             pio.write_image(fig3, '/project/multi_agent_critic_fc/results/firm_track_prob.pdf')
+
+    def render_hist(self, pds, ratios, track_probs):
+
+            pds = np.array(pds).reshape(-1)
+            # Compute the number of bins using the Freedman-Diaconis rule
+            iqr = np.percentile(pds, 75) - np.percentile(pds, 25)
+            bin_width = 2 * iqr / (len(pds) ** (1 / 3))  # Freedman-Diaconis rule
+            num_bins = int(np.ceil((np.max(pds) - np.min(pds)) / bin_width))
+
+
+
+            # Create scatter plot with Plotly Express
+            fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='probability density')
+
+            fig1.update_layout(
+                title="Probability of Detection",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+            # Save the first plot to a file
+            pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
+
+            ratios = np.array(ratios).reshape(-1)
+
+            # Compute the number of bins using the Freedman-Diaconis rule
+            iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
+            bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
+            num_bins = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
+
+            fig2 = px.histogram(ratios, x=ratios, nbins=num_bins, title='Histogram', histnorm='probability density')
+
+            fig2.update_layout(
+                title="Waveform duration ratio",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+            pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+
+            track_probs = np.array(track_probs).reshape(-1)
+
+            # Compute the number of bins using the Freedman-Diaconis rule
+            iqr = np.percentile(track_probs, 75) - np.percentile(track_probs, 25)
+            bin_width = 2 * iqr / (len(track_probs) ** (1 / 3))  # Freedman-Diaconis rule
+            num_bins = int(np.ceil((np.max(track_probs) - np.min(track_probs)) / bin_width))
+
+            fig3 = px.histogram(track_probs, x=track_probs, nbins=num_bins, title='Histogram', histnorm='probability density')
+
+            fig3.update_layout(
+                title="Firm track probability",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+
+            # Save the second plot to a file
+            pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
+
+    def render_hist_treshold(self, pds, ratios, track_probs, treshold=0.9):
+
+            pds = np.array(pds).reshape(-1)
+            filter = pds >= treshold
+            pds = pds[filter]
+            # Compute the number of bins using the Freedman-Diaconis rule
+            iqr = np.percentile(pds, 75) - np.percentile(pds, 25)
+            bin_width = 2 * iqr / (len(pds) ** (1 / 3))  # Freedman-Diaconis rule
+            num_bins = int(np.ceil((np.max(pds) - np.min(pds)) / bin_width))
+
+            # Create scatter plot with Plotly Express
+            fig1 = px.histogram(pds, x=pds, nbins=num_bins, title='Histogram', histnorm='probability density')
+
+            fig1.update_layout(
+                title="Probability of Detection (Filtered)",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+            # Save the first plot to a file
+            pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection_filtered.pdf')
+
+            # ratios = np.array(ratios).reshape(-1)
+            #
+            # # Compute the number of bins using the Freedman-Diaconis rule
+            # iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
+            # bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
+            # num_bins = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
+            #
+            # fig2 = px.histogram(ratios, x=ratios, nbins=num_bins, title='Histogram', histnorm='probability density')
+            #
+            # fig2.update_layout(
+            #     title="Waveform duration ratio",
+            #     xaxis_title="Time",
+            #     yaxis_title="Value"
+            # )
+            # pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+
+            track_probs = np.array(track_probs).reshape(-1)
+            filter = track_probs >= treshold
+            track_probs = track_probs[filter]
+            # Compute the number of bins using the Freedman-Diaconis rule
+            iqr = np.percentile(track_probs, 75) - np.percentile(track_probs, 25)
+            bin_width = 2 * iqr / (len(track_probs) ** (1 / 3))  # Freedman-Diaconis rule
+            num_bins = int(np.ceil((np.max(track_probs) - np.min(track_probs)) / bin_width))
+
+            fig3 = px.histogram(track_probs, x=track_probs, nbins=num_bins, title='Histogram',
+                                histnorm='probability density')
+
+            fig3.update_layout(
+                title="Firm track probability (filtered)",
+                xaxis_title="Time",
+                yaxis_title="Value"
+            )
+
+            # Save the second plot to a file
+            pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob_filtered.pdf')
