@@ -51,34 +51,34 @@ pds = []
 ratios = []
 track = []
 
-num_iterations = 1000
-for _ in range(num_iterations):
-
-    obs, _ = env.reset()
-
-    env.wind_speed = 40
-
-    env.altitude = 10
-
-    env.rcs = 1
-
-    env.rainfall_rate = 2.7 * 10e-7
-    done = False
-    while not done:
-        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-
-        actions = {0: parameters_1}
-        # print(f"Parameters: {None} given observation at previous timestep: {obs}")
-        obs, rewards, terminateds, truncateds, _ = env.step(actions)
-
-        done = terminateds["__all__"]
-    pds.append(env.pds)
-    ratios.append(env.ratios)
-    track.append(carpet.firm_track_probability(env.pds))
-
-# env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
-env.render_hist(pds=pds, ratios=ratios, track_probs=track)
-env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
+# num_iterations = 1000
+# for _ in range(num_iterations):
+#
+#     obs, _ = env.reset()
+#
+#     env.wind_speed = 40
+#
+#     env.altitude = 10
+#
+#     env.rcs = 1
+#
+#     env.rainfall_rate = 2.7 * 10e-7
+#     done = False
+#     while not done:
+#         parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+#
+#         actions = {0: parameters_1}
+#         # print(f"Parameters: {None} given observation at previous timestep: {obs}")
+#         obs, rewards, terminateds, truncateds, _ = env.step(actions)
+#
+#         done = terminateds["__all__"]
+#     pds.append(env.pds)
+#     ratios.append(env.ratios)
+#     track.append(carpet.firm_track_probability(env.pds))
+#
+# # env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
+# env.render_hist(pds=pds, ratios=ratios, track_probs=track)
+# env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
 
 
 pds = np.zeros((20, 20))
