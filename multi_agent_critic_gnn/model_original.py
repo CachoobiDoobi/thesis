@@ -28,25 +28,25 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # This does nothing. It would be called in the forward method if this was an agent
         ##################
         self.model = TorchComplex(obs_space, action_space, num_outputs, model_config, name).to(device)
-        #############################3
+        #############################
         self.dropout_rate = 0.2  # dropout_rate
         self.dropout = nn.Dropout(self.dropout_rate, inplace=False).to(device)
         self.relu = nn.PReLU().to(device)
         # hardcode number of parameters
         self.embedding = Linear(in_features=6, out_features=6).to(device)
-        # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
+
         input_size = 4 + 6 # equal to action space + EMBEDDINGS
-        hidden_dim = 64
+        hidden_dim = 32
         # TODO Add shared encoder for all nodes
         # TODO hierarchical pooling
         self.convs = ModuleList([
             GCNConv(input_size, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim*2),
-            GCNConv(hidden_dim*2, hidden_dim*4),
-            GCNConv(hidden_dim*4, hidden_dim*2),
-            GCNConv(hidden_dim * 2, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim // 2),
-            GCNConv(hidden_dim//2, 1)
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, 1)
         ]).to(device)
 
     @override(ModelV2)
