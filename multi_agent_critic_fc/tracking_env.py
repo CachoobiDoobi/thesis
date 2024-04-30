@@ -471,21 +471,7 @@ class TrackingEnv(MultiAgentEnv):
             # Save the first plot to a file
             pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection_filtered.pdf')
 
-            # ratios = np.array(ratios).reshape(-1)
-            #
-            # # Compute the number of bins using the Freedman-Diaconis rule
-            # iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
-            # bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
-            # num_bins = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
-            #
-            # fig2 = px.histogram(ratios, x=ratios, nbins=num_bins, title='Histogram', histnorm='probability density')
-            #
-            # fig2.update_layout(
-            #     title="Waveform duration ratio",
-            #     xaxis_title="Time",
-            #     yaxis_title="Value"
-            # )
-            # pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+
 
             track_probs = np.array(track_probs).reshape(-1)
             filter = track_probs >= treshold
