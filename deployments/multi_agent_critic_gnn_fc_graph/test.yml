@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: test-cc
+  name: test-cc-gnn-fc-graph
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -28,9 +28,9 @@ spec:
                 --single-branch
                 project;
             cd project;
-            python3 multi_agent_critic_gnn/test.py;
+            python3 multi_agent_critic_gnn_fc_graph/test.py;
             cd;
-            cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/cc_gnn;"
+            cp -r  /project/multi_agent_critic_gnn_fc_graph/results /nas-tmp/Radu/cc_gnn_fc_graph;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;

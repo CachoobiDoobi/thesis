@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: test-cc
+  name: train-cc-gnn-fc-graph
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -28,7 +28,7 @@ spec:
                 --single-branch
                 project;
             cd project;
-            python3 multi_agent_critic_gnn/test.py;
+            python3  multi_agent_critic_gnn/train.py;
             cd;
             cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/cc_gnn;"
           # pyenv install 3.9.0;
