@@ -95,7 +95,6 @@ num_iterations = 100
 
 for i, r in enumerate(rcs):
     for j, w in enumerate(wind_speed):
-        logging.debug(r, w)
         for _ in range(num_iterations):
 
             obs, _ = env.reset()
@@ -133,7 +132,6 @@ track = np.zeros((20, 20))
 
 for i, r in enumerate(rcs):
     for j, w in enumerate(rainfall_rate):
-        logging.debug(r, w)
         for _ in range(num_iterations):
 
             obs, _ = env.reset()
@@ -173,7 +171,6 @@ track = np.zeros((20, 20))
 
 for i, w in enumerate(wind_speed):
     for j, r in enumerate(rainfall_rate):
-        logging.debug(r, w)
         for _ in range(num_iterations):
 
             obs, _ = env.reset()
