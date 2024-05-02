@@ -82,6 +82,8 @@ for _ in range(num_iterations):
 env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
 
+# TODO fix color scale so we can compare among all models and heatmaps
+# TODO fix scale so it starts from the actual value of the parameter
 
 pds = np.zeros((20, 20))
 ratios = np.zeros((20, 20))

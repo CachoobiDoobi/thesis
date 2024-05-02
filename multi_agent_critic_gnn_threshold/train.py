@@ -94,14 +94,14 @@ stop = {
     "time_total_s": 3600 * 18
 }
 
-storage = '/project/multi_agent_critic_gnn/results'
+storage = '/project/multi_agent_critic_gnn_threshold/results'
 
 tuner = tune.Tuner(
     CentralizedCritic,
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
                              storage_path=storage,
-                             name="multiagent_cc_7layers"),
+                             name="multiagent_cc_gnn_threshold"),
 )
 results = tuner.fit()
 
