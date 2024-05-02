@@ -77,7 +77,7 @@ def build_graphs_from_batch(bursts):
         disim_matrix = disim_matrix / np.max(disim_matrix)
         for i, node1 in enumerate(graph.nodes()):
             for j, node2 in enumerate(graph.nodes()):
-                if node1 != node2 and 0.5 < disim_matrix[i, j]:
+                if node1 != node2 and 0.5 <= disim_matrix[i, j]:
                     graph.add_edge(node1, node2, weight=disim_matrix[i, j])
         node_features = torch.tensor([graph.nodes[node]['param'] for node in graph.nodes()])
         edge_indices = torch.tensor(list(graph.edges()), dtype=torch.int64).t().contiguous()
