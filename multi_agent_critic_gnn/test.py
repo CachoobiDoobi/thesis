@@ -88,7 +88,7 @@ for _ in range(num_iterations):
 
 env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
-
+print("hist done")
 pds = np.zeros((20, 20))
 ratios = np.zeros((20, 20))
 track = np.zeros((20, 20))
@@ -132,7 +132,7 @@ ratios = ratios / num_iterations
 track = track / num_iterations
 
 plot_heatmaps_rcs_wind(pds, ratios, track)
-
+print("rcs vs wind done")
 pds = np.zeros((20, 20))
 ratios = np.zeros((20, 20))
 track = np.zeros((20, 20))
@@ -170,7 +170,7 @@ ratios = ratios / num_iterations
 track = track / num_iterations
 
 plot_heatmaps_rcs_rainfall(pds, ratios, track)
-
+print("rcs vs rain done")
 ########################
 
 pds = np.zeros((20, 20))
@@ -212,3 +212,4 @@ track = track / num_iterations
 
 plot_heatmaps_wind_rainfall(pds, ratios, track)
 
+print("wind vs rain done")
