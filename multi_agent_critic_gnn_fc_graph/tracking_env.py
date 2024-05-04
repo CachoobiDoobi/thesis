@@ -260,7 +260,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, '/project/multi_agent_critic_gnn/results/probability_of_detection.pdf')
+        pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/probability_of_detection.pdf')
 
         # Create Plotly figure for the second plot (Waveform duration ratio)
         fig2 = go.Figure()
@@ -272,7 +272,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the second plot to a file
-        pio.write_image(fig2, '/project/multi_agent_critic_gnn/results/waveform_duration_ratio.pdf')
+        pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/waveform_duration_ratio.pdf')
 
         track = carpet.firm_track_probability(self.pds)
         fig3 = go.Figure()
@@ -284,7 +284,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Probability"
         )
         # Save the second plot to a file
-        pio.write_image(fig3, '/project/multi_agent_critic_gnn/results/firm_track_prob.pdf')
+        pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/firm_track_prob.pdf')
 
     def render_with_variance(self, pds, ratios, track_probs):
 
@@ -328,7 +328,7 @@ class TrackingEnv(MultiAgentEnv):
                 yaxis_title="Value"
             )
             # Save the first plot to a file
-            pio.write_image(fig1, '/project/multi_agent_critic_gnn/results/probability_of_detection.pdf')
+            pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/probability_of_detection.pdf')
 
             # Create Plotly figure for the second plot (Waveform duration ratio)
             fig2 = go.Figure()
@@ -361,7 +361,7 @@ class TrackingEnv(MultiAgentEnv):
                 showlegend=False
             ))
             # Save the second plot to a file
-            pio.write_image(fig2, '/project/multi_agent_critic_gnn/results/waveform_duration_ratio.pdf')
+            pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/waveform_duration_ratio.pdf')
 
             fig3 = go.Figure()
             fig3.add_trace(
@@ -393,7 +393,7 @@ class TrackingEnv(MultiAgentEnv):
                 yaxis_title="Probability"
             )
             # Save the second plot to a file
-            pio.write_image(fig3, '/project/multi_agent_critic_gnn/results/firm_track_prob.pdf')
+            pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/firm_track_prob.pdf')
 
     def render_hist(self, pds, ratios, track_probs):
 
@@ -414,7 +414,7 @@ class TrackingEnv(MultiAgentEnv):
                 yaxis_title="Value"
             )
             # Save the first plot to a file
-            pio.write_image(fig1, '/project/multi_agent_critic_gnn/results/probability_of_detection.pdf')
+            pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/probability_of_detection.pdf')
 
             ratios = np.array(ratios).reshape(-1)
 
@@ -430,7 +430,7 @@ class TrackingEnv(MultiAgentEnv):
                 xaxis_title="Time",
                 yaxis_title="Value"
             )
-            pio.write_image(fig2, '/project/multi_agent_critic_gnn/results/waveform_duration_ratio.pdf')
+            pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/waveform_duration_ratio.pdf')
 
             track_probs = np.array(track_probs).reshape(-1)
 
@@ -448,7 +448,7 @@ class TrackingEnv(MultiAgentEnv):
             )
 
             # Save the second plot to a file
-            pio.write_image(fig3, '/project/multi_agent_critic_gnn/results/firm_track_prob.pdf')
+            pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/firm_track_prob.pdf')
 
     def render_hist_treshold(self, pds, ratios, track_probs, treshold=0.9):
 
@@ -469,7 +469,7 @@ class TrackingEnv(MultiAgentEnv):
                 yaxis_title="Value"
             )
             # Save the first plot to a file
-            pio.write_image(fig1, '/project/multi_agent_critic_gnn/results/probability_of_detection_filtered.pdf')
+            pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/probability_of_detection_filtered.pdf')
 
 
 
@@ -491,4 +491,4 @@ class TrackingEnv(MultiAgentEnv):
             )
 
             # Save the second plot to a file
-            pio.write_image(fig3, '/project/multi_agent_critic_gnn/results/firm_track_prob_filtered.pdf')
+            pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/firm_track_prob_filtered.pdf')
