@@ -47,7 +47,7 @@ ray.init()
 #
 # )
 
-cdir = '/nas-tmp/Radu/multi/results/multiagent/CentralizedCritic_MultiAgentTrackingEnv_522d5_00000_0_2024-04-19_17-36-14/checkpoint_000000'
+cdir = '/nas-tmp/Radu/cc_gnn_fc_graph/results/cc_gnn_fc_graph/CentralizedCritic_TrackingEnv_b7792_00000_0_2024-05-01_08-13-39/checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
