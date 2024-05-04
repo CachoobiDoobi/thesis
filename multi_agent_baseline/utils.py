@@ -9,6 +9,9 @@ import plotly.graph_objs as go
 
 import plotly.io as pio
 
+rcs = np.linspace(1, 20, num=20)
+wind_speed = np.linspace(start=0, stop=40, num=20)
+rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
 def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = restore_original_dimensions(obs=obs, obs_space=original_obs_space, tensorlib="torch")
     original_opponent_obs = restore_original_dimensions(obs=opponent_obs, obs_space=original_obs_space,
@@ -95,7 +98,7 @@ def build_graphs_from_batch(bursts):
 
 def plot_heatmaps_rcs_wind(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, zmin=0.6, zmax=1, xaxis=wind_speed, yaxis=rcs)
 
     layout = go.Layout(
         title='PD',
@@ -110,7 +113,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     pio.write_image(fig1, '/project/multi_agent_baseline/results/heatmap_rcs_wind_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, zmin=3, zmax=7, xaxis=wind_speed, yaxis=rcs)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -125,7 +128,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     pio.write_image(fig2, '/project/multi_agent_baseline/results/heatmap_rcs_wind_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, zmin=0.6, zmax=1, xaxis=wind_speed, yaxis=rcs)
 
     layout = go.Layout(
         title='Firm Track Probability',
@@ -143,7 +146,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
 
 def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, zmin=0.6, zmax=1, xaxis=rainfall_rate, yaxis=rcs)
 
     layout = go.Layout(
         title='PD',
@@ -158,7 +161,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     pio.write_image(fig1, '/project/multi_agent_baseline/results/heatmap_rcs_rain_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, zmin=3, zmax=7, xaxis=rainfall_rate, yaxis=rcs)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -173,7 +176,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     pio.write_image(fig2, '/project/multi_agent_baseline/results/heatmap_rcs_rain_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, zmin=0.6, zmax=1, xaxis=rainfall_rate, yaxis=rcs)
 
     layout = go.Layout(
         title='Firm Track Probability',
@@ -190,7 +193,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
 
 def plot_heatmaps_wind_rainfall(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, zmin=0.6, zmax=1, xaxis=rainfall_rate, yaxis=wind_speed)
 
     layout = go.Layout(
         title='PD',
@@ -205,7 +208,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     pio.write_image(fig1, '/project/multi_agent_baseline/results/heatmap_wind_rain_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, zmin=3, zmax=7, xaxis=rainfall_rate, yaxis=wind_speed)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -220,7 +223,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     pio.write_image(fig2, '/project/multi_agent_baseline/results/heatmap_wind_rain_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, zmin=0.6, zmax=1, xaxis=rainfall_rate, yaxis=wind_speed)
 
     layout = go.Layout(
         title='Firm Track Probability',

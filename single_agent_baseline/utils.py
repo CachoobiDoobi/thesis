@@ -9,6 +9,10 @@ import plotly.graph_objs as go
 
 import plotly.io as pio
 
+rcs = np.linspace(1, 20, num=20)
+wind_speed = np.linspace(start=0, stop=40, num=20)
+rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
+
 def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = restore_original_dimensions(obs=obs, obs_space=original_obs_space, tensorlib="torch")
     original_opponent_obs = restore_original_dimensions(obs=opponent_obs, obs_space=original_obs_space,
@@ -44,12 +48,15 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
 
 def build_graphs_from_batch(bursts):
     # TODO build radar-informed graph
+    # Can make edge features for each param,
+    # Edge feature can be based on actual blind ranges or other things
     batch_size, n_bursts, _ = bursts.shape
 
     # Function to calculate dissimilarity between bursts
     def calculate_similarity(burst1, burst2):
-        burst1 = np.array([burst1[0], burst1[2]])
-        burst2 = np.array([burst2[0], burst2[2]])
+        # print(burst1, burst2)
+        burst1 = np.array([burst1[0], burst1[1], burst1[3]])
+        burst2 = np.array([burst2[0], burst2[1], burst2[3]])
         # print(f'bursts: {burst1, burst2}')
         if np.any(burst1) and np.any(burst2):
             # cosine similarity
@@ -71,20 +78,19 @@ def build_graphs_from_batch(bursts):
         for i, node1 in enumerate(graph.nodes()):
             for j, node2 in enumerate(graph.nodes()):
                 if node1 != node2:  # No self-loops
-                    # TODO compute it using PRF and pulse duration only
                     similarity = calculate_similarity(graph.nodes[node1]['param'], graph.nodes[node2]['param'])
                     disim_matrix[i, j] = 1 - similarity
         disim_matrix = disim_matrix / np.max(disim_matrix)
         for i, node1 in enumerate(graph.nodes()):
             for j, node2 in enumerate(graph.nodes()):
-                if node1 != node2 and np.random.rand() < disim_matrix[i, j]:
+                if node1 != node2 and 0.5 <= disim_matrix[i, j]:
                     graph.add_edge(node1, node2, weight=disim_matrix[i, j])
         node_features = torch.tensor([graph.nodes[node]['param'] for node in graph.nodes()])
         edge_indices = torch.tensor(list(graph.edges()), dtype=torch.int64).t().contiguous()
 
         edge_weights = [data['weight'] for _, _, data in graph.edges(data=True)]
         edge_weights_tensor = torch.tensor(edge_weights, dtype=torch.float)
-        # print(f'The number of edges is: {graph.number_of_edges()}, edge weights: {edge_weights_tensor}')
+        print(f'The number of edges is: {graph.number_of_edges()}, edge weights: {edge_weights_tensor}')
         data = Data(x=node_features,
                     edge_index=edge_indices, edge_attr=edge_weights_tensor)
         data_list.append(data)
@@ -92,10 +98,9 @@ def build_graphs_from_batch(bursts):
     return DataLoader(data_list, batch_size=batch_size,
                       shuffle=True)  # torch.cat(nodes, dim=0), torch.cat(edges, dim=0) #Batch.from_data_list(data_list)
 
-
 def plot_heatmaps_rcs_wind(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, x=wind_speed, y=rcs, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='PD',
@@ -110,7 +115,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_rcs_wind_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, x=wind_speed, y=rcs, zmin=3, zmax=7)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -125,7 +130,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_rcs_wind_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, x=wind_speed, y=rcs, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='Firm Track Probability',
@@ -143,7 +148,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
 
 def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, x=rainfall_rate, y=rcs, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='PD',
@@ -158,7 +163,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_rcs_rain_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=rcs, zmin=3, zmax=7)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -173,7 +178,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_rcs_rain_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, x=rainfall_rate, y=rcs, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='Firm Track Probability',
@@ -190,7 +195,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
 
 def plot_heatmaps_wind_rainfall(pds, ratios, track):
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=pds)
+    heatmap = go.Heatmap(z=pds, x=rainfall_rate, y=wind_speed, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='PD',
@@ -205,7 +210,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_wind_rain_pd.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=ratios)
+    heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=wind_speed, zmin=3, zmax=7)
 
     layout = go.Layout(
         title='Waveform Duration Ratio',
@@ -220,7 +225,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_wind_rain_ratios.pdf')
 
     # Create a heatmap trace
-    heatmap = go.Heatmap(z=track)
+    heatmap = go.Heatmap(z=track, x=rainfall_rate, y=wind_speed, zmin=0.6, zmax=1)
 
     layout = go.Layout(
         title='Firm Track Probability',

@@ -5,7 +5,13 @@ from numpy.linalg import norm
 from ray.rllib.models.modelv2 import restore_original_dimensions
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
+import plotly.graph_objs as go
 
+import plotly.io as pio
+
+rcs = np.linspace(1, 20, num=20)
+wind_speed = np.linspace(start=0, stop=40, num=20)
+rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
 
 def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = restore_original_dimensions(obs=obs, obs_space=original_obs_space, tensorlib="torch")
@@ -90,3 +96,143 @@ def build_graphs_from_batch(bursts):
 
     return DataLoader(data_list, batch_size=batch_size,
                       shuffle=True)  # torch.cat(nodes, dim=0), torch.cat(edges, dim=0) #Batch.from_data_list(data_list)
+def plot_heatmaps_rcs_wind(pds, ratios, track):
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=pds, x=wind_speed, y=rcs, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='PD',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig1 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_wind_pd.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=ratios, x=wind_speed, y=rcs, zmin=3, zmax=7)
+
+    layout = go.Layout(
+        title='Waveform Duration Ratio',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig2 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_wind_ratios.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=track, x=wind_speed, y=rcs, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='Firm Track Probability',
+        xaxis=dict(title='Wind Speed'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig3 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_wind_track.pdf')
+
+
+
+def plot_heatmaps_rcs_rainfall(pds, ratios, track):
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=pds, x=rainfall_rate, y=rcs, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='PD',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig1 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_rain_pd.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=rcs, zmin=3, zmax=7)
+
+    layout = go.Layout(
+        title='Waveform Duration Ratio',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig2 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_rain_ratios.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=track, x=rainfall_rate, y=rcs, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='Firm Track Probability',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Radar Cross Section')
+    )
+
+    # Create figure
+    fig3 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_rcs_rain_track.pdf')
+
+
+def plot_heatmaps_wind_rainfall(pds, ratios, track):
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=pds, x=rainfall_rate, y=wind_speed, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='PD',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Wind Speed')
+    )
+
+    # Create figure
+    fig1 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig1, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_wind_rain_pd.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=wind_speed, zmin=3, zmax=7)
+
+    layout = go.Layout(
+        title='Waveform Duration Ratio',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Wind Speed')
+    )
+
+    # Create figure
+    fig2 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig2, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_wind_rain_ratios.pdf')
+
+    # Create a heatmap trace
+    heatmap = go.Heatmap(z=track, x=rainfall_rate, y=wind_speed, zmin=0.6, zmax=1)
+
+    layout = go.Layout(
+        title='Firm Track Probability',
+        xaxis=dict(title='Rainfall Rate'),
+        yaxis=dict(title='Wind Speed')
+    )
+
+    # Create figure
+    fig3 = go.Figure(data=heatmap, layout=layout)
+
+    # Save the first plot to a file
+    pio.write_image(fig3, '/project/multi_agent_critic_gnn_fc_graph/results/heatmap_wind_rain_track.pdf')
