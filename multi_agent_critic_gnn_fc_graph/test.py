@@ -41,11 +41,11 @@ env_config = {
 
 ray.init()
 
-# ModelCatalog.register_custom_model(
-#     "cc_model",
-#     TorchCentralizedCriticModel
-#
-# )
+ModelCatalog.register_custom_model(
+    "cc_model",
+    TorchCentralizedCriticModel
+
+)
 
 cdir = '/nas-tmp/Radu/cc_gnn_fc_graph/results/cc_gnn_fc_graph/CentralizedCritic_TrackingEnv_b7792_00000_0_2024-05-01_08-13-39/checkpoint_000000'
 
