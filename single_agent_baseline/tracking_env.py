@@ -94,7 +94,6 @@ class TrackingEnv(MultiAgentEnv):
             truth_alt.append(GroundTruthState(
                 transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
                 timestamp=start_time + timedelta(seconds=k)))
-            # print(truth[k].state_vector[0], truth[k].state_vector[1])
 
         self.truth = truth
 
@@ -235,8 +234,11 @@ class TrackingEnv(MultiAgentEnv):
 
         duration = 0
         for agent in self._agent_ids:
+            mask = action_dict[agent]['mask'].astype(bool)
             pris = [param_dict['PRI'][pri] for pri in action_dict[agent]["PRI"]]
+            pris = np.array(pris)[mask]
             n_pulses = action_dict[agent]['n_pulses']
+            n_pulses = n_pulses[mask]
             durations = pris * n_pulses
             duration += np.sum(durations)
         min_duration = 1 / (2 * 1e9 * self.target_resolution / c)

@@ -23,13 +23,13 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch variable_bursts
                 --single-branch
                 project;
             cd project;
             python3 single_agent_baseline/train.py;
             cd;
-            cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/baseline;"
+            cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/variable_action_space/baseline;"
 #            trap : TERM INT; sleep infinity & wait;"
           # pyenv install 3.9.0;
           #            poetry self update;

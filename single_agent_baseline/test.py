@@ -17,12 +17,14 @@ action_space = Dict(
      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
      'RF': MultiDiscrete(nvec=[2] * n_bursts),
+     'mask': MultiDiscrete(nvec=[2] * n_bursts)
      })
 observation_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'PRI': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
      'n_pulses': MultiDiscrete(nvec=[21] * n_bursts, start=[10] * n_bursts),
      'RF': MultiDiscrete(nvec=[2] * n_bursts),
+     'mask': MultiDiscrete(nvec=[2] * n_bursts),
      'PD': Box(low=0, high=1),
      'ratio': Box(low=0, high=100),
      'r_hat': Box(low=0, high=1e5),
@@ -81,9 +83,6 @@ for _ in range(num_iterations):
 # env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
-
-# TODO fix color scale so we can compare among all models and heatmaps
-# TODO fix scale so it starts from the actual value of the parameter
 
 pds = np.zeros((20, 20))
 ratios = np.zeros((20, 20))
