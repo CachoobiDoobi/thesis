@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: test-cc-threshold
+  name: test-cc-threshold-vb
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -24,13 +24,13 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch variable_bursts
                 --single-branch
                 project;
             cd project;
             python3 multi_agent_critic_gnn_threshold/test.py;
             cd;
-            cp -r  /project/multi_agent_critic_gnn_threshold/results /nas-tmp/Radu/cc_gnn_threshold;"
+            cp -r  /project/multi_agent_critic_gnn_threshold/results /nas-tmp/Radu/variable_action_space/cc_gnn_threshold;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;

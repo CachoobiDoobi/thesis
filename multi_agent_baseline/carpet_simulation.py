@@ -33,19 +33,20 @@ class CarpetSimulation:
         # what is this?
         carpet.Processing_M = 3
         for m, agent in enumerate(action_dict):
-            parameters = action_dict[agent]
-            pulse_durations = parameters.get("pulse_duration")
-            n_pulseses = parameters.get('n_pulses')
-            pris = parameters.get('PRI')
-            n_bursts = len(pris)
-            rfs = parameters.get('RF')
 
+            parameters = action_dict[agent]
+            mask = parameters.get('mask').astype(bool)
+            pulse_durations = parameters.get("pulse_duration")[mask]
+            n_pulseses = parameters.get('n_pulses')[mask]
+            pris = parameters.get('PRI')[mask]
+            n_bursts = mask.sum()
+            rfs = parameters.get('RF')[mask]
             for n in range(1, n_bursts + 1):
-                i = str(n + m * n_bursts)
-                setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
-                setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
-                setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
-                setattr(carpet,  f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
+                    i = str(n + m * n_bursts)
+                    setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
+                    setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
+                    setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
+                    setattr(carpet,  f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
 
 
         assert range_ > 0, "NEGATIVE RANGE"

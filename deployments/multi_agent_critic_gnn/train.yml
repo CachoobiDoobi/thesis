@@ -3,7 +3,7 @@ apiVersion: batch/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/job/
 kind: Job
 metadata:
-  name: train-cc-gnn
+  name: train-cc-gnn-vb
   namespace: gaghir-thesis
 spec:
   ttlSecondsAfterFinished: 100
@@ -24,13 +24,13 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch variable_bursts
                 --single-branch
                 project;
             cd project;
             python3  multi_agent_critic_gnn/train.py;
             cd;
-            cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/cc_gnn;"
+            cp -r  /project/multi_agent_critic_gnn/results /nas-tmp/Radu/variable_action_space/cc_gnn;"
           # pyenv install 3.9.0;
           #            poetry self update;
           #            poetry lock;

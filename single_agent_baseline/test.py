@@ -10,7 +10,7 @@ from utils import plot_heatmaps_rcs_wind, plot_heatmaps_rcs_rainfall, plot_heatm
 from tracking_env import TrackingEnv
 
 agents = [0]
-n_bursts = 6
+n_bursts = 10
 
 action_space = Dict(
     {'pulse_duration': MultiDiscrete(nvec=[5] * n_bursts, start=[0] * n_bursts),
@@ -45,7 +45,7 @@ env_config = {
 
 ray.init()
 
-cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_a85c3_00000_0_2024-04-28_12-05-51/checkpoint_000000'
+cdir = '/nas-tmp/Radu/variable_action_space/baseline/results/single_agent_baseline/?/checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))

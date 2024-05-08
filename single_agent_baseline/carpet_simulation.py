@@ -43,6 +43,7 @@ class CarpetSimulation:
             pris = parameters.get('PRI')[mask]
             n_bursts = mask.sum()
             rfs = parameters.get('RF')[mask]
+
             for n in range(1, n_bursts + 1):
                     i = str(n + m * n_bursts)
                     setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])

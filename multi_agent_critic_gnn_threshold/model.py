@@ -38,7 +38,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         #############################
         self.dropout_rate = 0.2  # dropout_rate
         self.dropout = nn.Dropout(self.dropout_rate, inplace=False).to(device)
-        self.activation = nn.Sigmoid().to(device)
+        self.activation = nn.PReLU().to(device)
         self.graph_norm = GraphNorm(hidden_dim).to(device)
 
         #############################
@@ -80,12 +80,12 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     # computes the central value function based on the Joint Observations
     def central_value_function(self, obs, opponent_obs, opponent_actions):
         # restore original shape
-        bursts, observation = preprocess_observations(obs=obs, opponent_obs=opponent_obs, original_obs_space=self.original_obs_space)
+        bursts, observation, mask = preprocess_observations(obs=obs, opponent_obs=opponent_obs, original_obs_space=self.original_obs_space)
         bursts = bursts.to(self.device)
+        burst_shape = bursts.shape
         observation = observation.to(self.device)
-
         # build graph here
-        loader = build_graphs_from_batch(bursts)
+        loader = build_graphs_from_batch(bursts, mask)
         embeddings = self.encoder_obs(observation)
         # forward
         for batch in loader:
@@ -94,10 +94,14 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
             x = batch.x
             x = x.to(self.device)
 
-            x = self.encoder_nodes(x)
+            x = self.encoder_nodes(x).reshape(burst_shape)
+            embeddings = embeddings.unsqueeze(1).expand(burst_shape[0], burst_shape[1], 6)
 
-            embeddings = embeddings.unsqueeze(2).expand(-1, -1, 6).reshape(-1, 6)
-            x = torch.cat([x, embeddings], dim=1).to(self.device)
+            # print(x.shape, embeddings.shape)
+
+            x = torch.cat([x, embeddings], dim=2).to(self.device)
+
+            x = x.reshape(-1, 10)
 
             edge_index = batch.edge_index.to(self.device)
             edge_weights = batch.edge_attr.to(self.device)
