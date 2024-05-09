@@ -38,7 +38,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         #############################
         self.dropout_rate = 0.2  # dropout_rate
         self.dropout = nn.Dropout(self.dropout_rate, inplace=False).to(device)
-        self.activation = nn.Sigmoid().to(device)
+        self.activation = nn.PReLU().to(device)
         self.graph_norm = GraphNorm(hidden_dim).to(device)
 
         #############################
