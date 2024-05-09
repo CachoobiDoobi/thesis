@@ -1,3 +1,4 @@
+import numpy as np
 import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
@@ -6,6 +7,7 @@ from ray.rllib.models import ModelCatalog
 
 from model import TorchCentralizedCriticModel
 from tracking_env import TrackingEnv
+from utils import plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall, plot_heatmaps_rcs_wind
 
 n_bursts = 3
 
@@ -85,3 +87,128 @@ for _ in range(num_iterations):
 
 env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
+print("hist done")
+pds = np.zeros((20, 20))
+ratios = np.zeros((20, 20))
+track = np.zeros((20, 20))
+
+rcs = np.linspace(1, 20, num=20)
+wind_speed = np.linspace(start=0, stop=40, num=20)
+rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
+
+num_iterations = 100
+
+for i, r in enumerate(rcs):
+    for j, w in enumerate(wind_speed):
+        for _ in range(num_iterations):
+
+            obs, _ = env.reset()
+
+            env.wind_speed = w
+
+            env.rcs = r
+
+            env.rainfall_rate = 2.7 * 10e-7
+
+            env.altitude = 10
+
+            done = False
+            while not done:
+                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+                parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
+
+                actions = {0: parameters_1, 1: parameters_2}
+                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
+                obs, rewards, terminateds, truncateds, _ = env.step(actions)
+
+                done = terminateds["__all__"]
+            pds[i, j] += np.mean(env.pds)
+            ratios[i, j] += np.mean(env.ratios)
+            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
+
+pds = pds / num_iterations
+ratios = ratios / num_iterations
+track = track / num_iterations
+
+plot_heatmaps_rcs_wind(pds, ratios, track)
+print("rcs vs wind done")
+pds = np.zeros((20, 20))
+ratios = np.zeros((20, 20))
+track = np.zeros((20, 20))
+
+for i, r in enumerate(rcs):
+    for j, w in enumerate(rainfall_rate):
+        for _ in range(num_iterations):
+
+            obs, _ = env.reset()
+
+            env.wind_speed = 40
+
+            env.rcs = r
+
+            env.rainfall_rate = w
+
+            env.altitude = 10
+
+            done = False
+            while not done:
+                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+                parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
+
+                actions = {0: parameters_1, 1: parameters_2}
+                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
+                obs, rewards, terminateds, truncateds, _ = env.step(actions)
+
+                done = terminateds["__all__"]
+            pds[i, j] += np.mean(env.pds)
+            ratios[i, j] += np.mean(env.ratios)
+            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
+
+pds = pds / num_iterations
+ratios = ratios / num_iterations
+track = track / num_iterations
+
+plot_heatmaps_rcs_rainfall(pds, ratios, track)
+print("rcs vs rain done")
+########################
+
+pds = np.zeros((20, 20))
+ratios = np.zeros((20, 20))
+track = np.zeros((20, 20))
+
+for i, w in enumerate(wind_speed):
+    for j, r in enumerate(rainfall_rate):
+        for _ in range(num_iterations):
+
+            obs, _ = env.reset()
+
+            env.wind_speed = w
+
+            env.rcs = 1
+
+            env.rainfall_rate = r
+
+            env.altitude = 10
+
+            done = False
+            while not done:
+                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+                parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
+
+                actions = {0: parameters_1, 1: parameters_2}
+
+                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
+                obs, rewards, terminateds, truncateds, _ = env.step(actions)
+
+                done = terminateds["__all__"]
+            pds[i, j] += np.mean(env.pds)
+            ratios[i, j] += np.mean(env.ratios)
+            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
+
+pds = pds / num_iterations
+ratios = ratios / num_iterations
+track = track / num_iterations
+
+plot_heatmaps_wind_rainfall(pds, ratios, track)
+
+print("wind vs rain done")
