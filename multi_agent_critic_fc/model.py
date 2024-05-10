@@ -3,7 +3,7 @@ from ray.rllib.models.torch.complex_input_net import ComplexInputNetwork as Torc
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from torch.nn import Linear
+from torch.nn import Linear, BatchNorm1d
 
 from utils import preprocess_observations, mask_bursts
 
@@ -27,29 +27,21 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.model = TorchComplex(obs_space, action_space, num_outputs, model_config, name).to(device)
         #############################3
         self.dropout_rate = 0.2  # dropout_rate
+        self.activation = nn.PReLU()
+        self.dropout = nn.Dropout(self.dropout_rate)
         # hardcode number of parameters
         self.embedding = Linear(in_features=6, out_features=6).to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         input_size = 10  # equal to action space + EMBEDDINGS
         hidden_dim = 128
 
-        self.vf = nn.Sequential(
+        self.vf = nn.ModuleList([
             nn.Linear(input_size, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
-            nn.Linear(hidden_dim, 1),
+            nn.Linear(hidden_dim, 1)]
         ).to(device)
         # self.convs.to(device)
 
@@ -72,8 +64,12 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
             observation = observations[i].to(self.device)
             embeddings = self.embedding(observation).expand(burst.shape[0], 6)
             x = torch.cat([burst, embeddings], dim=1).to(self.device)
-            out = self.vf(x)
-            out = torch.mean(out)
+            for j, layer in enumerate(self.vf):
+                if j % 2 == 0 and j != 0:
+                    x = x + self.dropout(self.activation(layer(x)))
+                else:
+                    x = self.dropout(self.activation(layer(x)))
+            out = torch.mean(x)
             output[i] = out
         return output
 
