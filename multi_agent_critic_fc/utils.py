@@ -57,7 +57,7 @@ def mask_bursts(bursts, batched_mask):
     batch_size, n_bursts, feature_size = bursts.shape
     new_bursts = []
     for i in range(batch_size):
-        mask = batched_mask[i]
+        mask = batched_mask[i].cpu()
         filtered_bursts = bursts[i][mask]
         new_bursts.append(filtered_bursts)
     return new_bursts
