@@ -65,7 +65,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
                                                       original_obs_space=self.original_obs_space)
 
         bursts = mask_bursts(bursts, mask)
-        output = torch.zeros(mask.shape[0])
+        output = torch.zeros(mask.shape[0]).to(self.device)
         for i, burst in enumerate(bursts):
             burst = burst.to(self.device)
 
