@@ -33,7 +33,6 @@ class CarpetSimulation:
         # what is this?
         carpet.Processing_M = 3
         for m, agent in enumerate(action_dict):
-
             parameters = action_dict[agent]
             mask = parameters.get('mask').astype(bool)
             pulse_durations = parameters.get("pulse_duration")[mask]

@@ -27,7 +27,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.original_obs_space = obs_space.original_space
 
         input_size = 4 + 6  # equal to action space + EMBEDDINGS
-        hidden_dim = 32
+        hidden_dim = 128
 
         ##################
         # This does nothing. It would be called in the forward method if this was an agent
@@ -38,7 +38,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         #############################
         self.dropout_rate = 0.2  # dropout_rate
         self.dropout = nn.Dropout(self.dropout_rate, inplace=False).to(device)
-        self.activation = nn.Sigmoid().to(device)
+        self.activation = nn.PReLU().to(device)
         self.graph_norm = GraphNorm(hidden_dim).to(device)
 
         #############################

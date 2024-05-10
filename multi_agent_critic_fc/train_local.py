@@ -35,8 +35,6 @@ observation_space = Dict(
      }
 )
 
-
-
 agents = [0, 1]
 
 env_config = {
@@ -61,7 +59,7 @@ config = (
     .experimental(_enable_new_api_stack=False)
     .environment(TrackingEnv, env_config=env_config, clip_actions=True, disable_env_checking=True)
     .framework('torch')
-    .rollouts(batch_mode="complete_episodes", num_rollout_workers=20)
+    .rollouts(batch_mode="complete_episodes", num_rollout_workers=1)
     .training(model={"custom_model": "cc_model"})
     .multi_agent(
         policies={
@@ -85,15 +83,15 @@ config = (
         else "pol2",
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    .resources(num_gpus=1, num_cpus_per_worker=2)
-    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    .resources(num_gpus=0, num_cpus_per_worker=1)
+    .training(train_batch_size=128, sgd_minibatch_size=32, num_sgd_iter=20)
 )
 
 stop = {
-    # "training_iteration": 1,
+    "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 18
+    # "time_total_s": 3600 * 18
 }
 
 storage = '/project/multi_agent_critic_fc/results'

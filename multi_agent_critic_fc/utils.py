@@ -1,17 +1,17 @@
 import networkx as nx
 import numpy as np
+import plotly.graph_objs as go
+import plotly.io as pio
 import torch
 from numpy.linalg import norm
 from ray.rllib.models.modelv2 import restore_original_dimensions
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
-import plotly.graph_objs as go
-
-import plotly.io as pio
 
 rcs = np.linspace(1, 20, num=20)
 wind_speed = np.linspace(start=0, stop=40, num=20)
 rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
+
 
 def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = restore_original_dimensions(obs=obs, obs_space=original_obs_space, tensorlib="torch")
@@ -26,6 +26,9 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
     original_obs = {key: torch.argmax(original_obs[key], dim=-1) for key in original_obs}
     original_opponent_obs = {key: torch.argmax(original_opponent_obs[key], dim=-1) for key in original_opponent_obs}
     # extract burst params
+    mask_original = original_obs['mask']
+    mask_opponent = original_opponent_obs['mask']
+
     n_bursts = original_obs['PRI'].shape[1] + original_opponent_obs['PRI'].shape[1]
     bursts = torch.zeros(batch_size, n_bursts, 4)  # hardcoded :(
     # burst is [batch size, n_bursts, params], obs is keys, batch size, params
@@ -40,10 +43,24 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
                 else:
                     bursts[:, n, i] = original_opponent_obs[key][:, n - n_bursts // 2]
                 i += 1
-            else:
+            elif key != 'mask':
                 observation[:, j] = original_obs[key].reshape(-1)
                 j += 1
-    return bursts, observation
+    mask = torch.cat([mask_original, mask_opponent], dim=1).bool()
+    if mask.sum() == 0:
+        mask = np.ones_like(mask)
+
+    return bursts, observation, mask
+
+
+def mask_bursts(bursts, batched_mask):
+    batch_size, n_bursts, feature_size = bursts.shape
+    new_bursts = []
+    for i in range(batch_size):
+        mask = batched_mask[i]
+        filtered_bursts = bursts[i][mask]
+        new_bursts.append(filtered_bursts)
+    return new_bursts
 
 
 def build_graphs_from_batch(bursts):
@@ -140,7 +157,6 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
 
     # Save the first plot to a file
     pio.write_image(fig3, '/project/multi_agent_critic_fc/results/heatmap_rcs_wind_track.pdf')
-
 
 
 def plot_heatmaps_rcs_rainfall(pds, ratios, track):

@@ -5,7 +5,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from torch.nn import Linear
 
-from utils import preprocess_observations
+from utils import preprocess_observations, mask_bursts
 
 torch, nn = try_import_torch()
 
@@ -30,7 +30,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # hardcode number of parameters
         self.embedding = Linear(in_features=6, out_features=6).to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        input_size = 30  # equal to action space + EMBEDDINGS
+        input_size = 10  # equal to action space + EMBEDDINGS
         hidden_dim = 128
 
         self.vf = nn.Sequential(
@@ -61,18 +61,21 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     # computes the central value function based on the Joint Observations
     def central_value_function(self, obs, opponent_obs, opponent_actions):
         # restore original shape
-        bursts, observation = preprocess_observations(obs=obs, opponent_obs=opponent_obs,
+        bursts, observations, mask = preprocess_observations(obs=obs, opponent_obs=opponent_obs,
                                                       original_obs_space=self.original_obs_space)
-        bursts = bursts.to(self.device)
-        observation = observation.to(self.device)
-        bursts = bursts.reshape(bursts.shape[0], -1)
 
-        embeddings = self.embedding(observation)
+        bursts = mask_bursts(bursts, mask)
+        output = torch.zeros(mask.shape[0])
+        for i, burst in enumerate(bursts):
+            burst = burst.to(self.device)
 
-        x = torch.cat([bursts, embeddings], dim=1).to(self.device)
-
-        out = self.vf(x).reshape(-1)
-        return out
+            observation = observations[i].to(self.device)
+            embeddings = self.embedding(observation).expand(burst.shape[0], 6)
+            x = torch.cat([burst, embeddings], dim=1).to(self.device)
+            out = self.vf(x)
+            out = torch.mean(out)
+            output[i] = out
+        return output
 
     @override(ModelV2)
     def value_function(self):

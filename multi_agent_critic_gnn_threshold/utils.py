@@ -52,8 +52,6 @@ def preprocess_observations(obs, opponent_obs, original_obs_space):
     mask = torch.cat([mask_original, mask_opponent], dim=1).bool()
     if mask.sum() == 0:
         mask = np.ones_like(mask)
-    #
-    #     #.view(batch_size, -1, 4)
 
     return bursts, observation, mask
 

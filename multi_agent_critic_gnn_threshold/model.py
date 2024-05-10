@@ -27,7 +27,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.original_obs_space = obs_space.original_space
 
         input_size = 4 + 6  # equal to action space + EMBEDDINGS
-        hidden_dim = 32
+        hidden_dim = 128
 
         ##################
         # This does nothing. It would be called in the forward method if this was an agent
