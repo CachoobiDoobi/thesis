@@ -112,7 +112,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
 
                 x = self.graph_norm(x, batch)
             x = self.decoder1(x)
-            x = global_mean_pool(x, batch.batch)
+            x = global_mean_pool(x, batch)
             return x.reshape(-1)
 
     @override(ModelV2)
