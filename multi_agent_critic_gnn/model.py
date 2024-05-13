@@ -27,7 +27,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.original_obs_space = obs_space.original_space
 
         input_size = 4 + 6  # equal to action space + EMBEDDINGS
-        hidden_dim = 32
+        hidden_dim = 128
 
         ##################
         # This does nothing. It would be called in the forward method if this was an agent
@@ -62,12 +62,9 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # The ratios are hardcoded in such a way that we get 1 node at the end. For a graph of a different size, might need different ratios.
         self.layers = ModuleList([
             GCNConv(input_size, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim),
             TopKPooling(hidden_dim, ratio=0.7),
             GCNConv(hidden_dim, hidden_dim),
-            GCNConv(hidden_dim, hidden_dim),
             TopKPooling(hidden_dim, ratio=0.5),
-            GCNConv(hidden_dim, hidden_dim),
             GCNConv(hidden_dim, hidden_dim),
             TopKPooling(hidden_dim, ratio=0.1),
         ]).to(device)
