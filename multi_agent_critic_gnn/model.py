@@ -52,21 +52,18 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         ##############################
         ### DECODER ##################
         ##############################
-        self.decoder1 = torch.nn.Linear(hidden_dim, hidden_dim//2).to(device)
-        self.decoder2 = torch.nn.Linear(hidden_dim//2, 1).to(device)
-
+        self.decoder1 = torch.nn.Linear(hidden_dim, 1).to(device)
         ##############################
         #### GNN #####################
         ##############################
-
+        # TODO id this doesnt work, try no pooling
         # The ratios are hardcoded in such a way that we get 1 node at the end. For a graph of a different size, might need different ratios.
         self.layers = ModuleList([
             GCNConv(input_size, hidden_dim),
-            TopKPooling(hidden_dim, ratio=0.7),
             GCNConv(hidden_dim, hidden_dim),
-            TopKPooling(hidden_dim, ratio=0.5),
             GCNConv(hidden_dim, hidden_dim),
-            TopKPooling(hidden_dim, ratio=0.1),
+            GCNConv(hidden_dim, hidden_dim),
+            GCNConv(hidden_dim, hidden_dim),
         ]).to(device)
 
     @override(ModelV2)
@@ -110,13 +107,12 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
                     x = layer(x=x, edge_index=edge_index, edge_weight=edge_weights)
                     x = self.activation(x)
                     x = self.dropout(x)
-                elif isinstance(layer, TopKPooling):
-                    x, edge_index, edge_weights, batch, _, _ = layer(x=x, edge_index=edge_index, edge_attr=edge_weights, batch=batch)
+                # elif isinstance(layer, TopKPooling):
+                #     x, edge_index, edge_weights, batch, _, _ = layer(x=x, edge_index=edge_index, edge_attr=edge_weights, batch=batch)
 
                 x = self.graph_norm(x, batch)
             x = self.decoder1(x)
-            x = self.decoder2(x)
-
+            x = global_mean_pool(x, batch.batch)
             return x.reshape(-1)
 
     @override(ModelV2)
