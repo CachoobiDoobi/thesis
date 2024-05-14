@@ -31,7 +31,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         self.embedding = Linear(in_features=6, out_features=6).to(device)
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         input_size = 30  # equal to action space + EMBEDDINGS
-        hidden_dim = 128
+        hidden_dim = 256
 
         self.vf = nn.Sequential(
             nn.Linear(input_size, hidden_dim),
@@ -39,16 +39,16 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
             nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, hidden_dim),
             nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.PReLU(),
-            nn.Dropout(self.dropout_rate),
+            # nn.Dropout(self.dropout_rate),
+            # nn.Linear(hidden_dim, hidden_dim),
+            # nn.PReLU(),
+            # nn.Dropout(self.dropout_rate),
+            # nn.Linear(hidden_dim, hidden_dim),
+            # nn.PReLU(),
+            # nn.Dropout(self.dropout_rate),
+            # nn.Linear(hidden_dim, hidden_dim),
+            # nn.PReLU(),
+            # nn.Dropout(self.dropout_rate),
             nn.Linear(hidden_dim, 1),
         ).to(device)
         # self.convs.to(device)
