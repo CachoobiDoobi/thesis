@@ -49,7 +49,7 @@ ModelCatalog.register_custom_model(
 
 )
 
-cdir = '/nas-tmp/Radu/cc_fc/results/multiagent_cc_fc/CentralizedCritic_TrackingEnv_a50e2_00000_0_2024-04-29_08-51-18/checkpoint_000000'
+cdir = '/nas-tmp/Radu/cc_fc/results/multiagent_cc_fc/CentralizedCritic_TrackingEnv_9e8eb_00000_0_2024-05-14_10-13-33/checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
 # agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
