@@ -83,6 +83,14 @@ for _ in range(num_iterations):
     pds.append(env.pds)
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
+pds = np.array(pds).reshape(-1)
+ratios = np.array(ratios).reshape(-1)
+track = np.array(ratios).reshape(-1)
+
+np.save(pds, "results/pd.npy")
+np.save(ratios, "results/pd.npy")
+np.save(track, "results/pd.npy")
+
 plot_2d_hist(track, ratios)
 # env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 # env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
