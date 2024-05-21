@@ -125,7 +125,7 @@ for i, r in enumerate(rcs):
             done = False
             max_reward = 0
             index = -1
-            i = 0
+            n = 0
             while not done:
                 parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
 
@@ -134,9 +134,9 @@ for i, r in enumerate(rcs):
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
                 if sum(rewards.values()) > max_reward:
                     max_reward = sum(rewards.values())
-                    index = i
+                    index = n
                 done = terminateds["__all__"]
-                i += 1
+                n += 1
             pds[i, j] = env.pds[index]
             ratios[i, j] = env.ratios[index]
             track[i, j] = carpet.firm_track_probability(env.pds)[index]
@@ -165,7 +165,7 @@ for i, r in enumerate(rcs):
             done = False
             max_reward = 0
             index = -1
-            i = 0
+            n = 0
             while not done:
                 parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
 
@@ -174,9 +174,9 @@ for i, r in enumerate(rcs):
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
                 if sum(rewards.values()) > max_reward:
                     max_reward = sum(rewards.values())
-                    index = i
+                    index = n
                 done = terminateds["__all__"]
-                i += 1
+                n += 1
             pds[i, j] = env.pds[index]
             ratios[i, j] = env.ratios[index]
             track[i, j] = carpet.firm_track_probability(env.pds)[index]
@@ -207,7 +207,7 @@ for i, w in enumerate(wind_speed):
             done = False
             max_reward = 0
             index = -1
-            i = 0
+            n = 0
             while not done:
                 parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
 
@@ -216,9 +216,9 @@ for i, w in enumerate(wind_speed):
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
                 if sum(rewards.values()) > max_reward:
                     max_reward = sum(rewards.values())
-                    index = i
+                    index = n
                 done = terminateds["__all__"]
-                i += 1
+                n += 1
             pds[i, j] = env.pds[index]
             ratios[i, j] = env.ratios[index]
             track[i, j] = carpet.firm_track_probability(env.pds)[index]
