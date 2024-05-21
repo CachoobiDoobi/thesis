@@ -238,3 +238,29 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
 
     # Save the first plot to a file
     pio.write_image(fig3, '/project/multi_agent_critic_gnn_threshold/results/heatmap_wind_rain_track.pdf')
+
+
+def plot_2d_hist(track, ratios):
+
+    track = np.array(track).reshape(-1)
+    track = np.round(track, decimals=2)
+    ratios = np.array(ratios).reshape(-1)
+    ratios = np.round(ratios, decimals=2)
+
+    iqr = np.percentile(track, 75) - np.percentile(track, 25)
+    bin_width = 2 * iqr / (len(track) ** (1 / 3))  # Freedman-Diaconis rule
+    num_bins_x = int(np.ceil((np.max(track) - np.min(track)) / bin_width))
+
+    iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
+    bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
+    num_bins_y = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
+
+    layout = go.Layout(
+        title='Waveform distribution',
+        xaxis=dict(title='Firm track probability'),
+        yaxis=dict(title='Waveform duration ratio')
+    )
+    # Create the 2D histogram
+    fig = go.Figure(data=go.Histogram2d(x=track, y=ratios, nbinsx=num_bins_x, nbinsy=num_bins_y), layout=layout)
+
+    pio.write_image(fig, '/project/multi_agent_critic_gnn_threshold/results/2dhist.pdf')
