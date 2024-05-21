@@ -263,7 +263,10 @@ def plot_2d_hist(track, ratios):
         xaxis=dict(title='Firm track probability'),
         yaxis=dict(title='Waveform duration ratio')
     )
+    print("number of bins", num_bins_x, num_bins_y, track.shape, ratios.shape)
     # Create the 2D histogram
-    fig = go.Figure(data=go.Histogram2d(x=track, y=ratios, nbinsx=num_bins_x, nbinsy=num_bins_y, histnorm='probability'), layout=layout)
+    fig = go.Figure(
+        data=go.Histogram2d(x=track, y=dict(range[0, 8]), nbinsx=num_bins_x, nbinsy=num_bins_y, histnorm='probability',
+                            zmin=0, zmax=0.3), layout=layout)
 
     pio.write_image(fig, '/project/multi_agent_critic_gnn_threshold/results/2dhist.pdf')
