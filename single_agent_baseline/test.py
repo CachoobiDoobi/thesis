@@ -137,9 +137,9 @@ for i, r in enumerate(rcs):
                     index = i
                 done = terminateds["__all__"]
                 i += 1
-            pds[i, j] = env.pds[i]
-            ratios[i, j] = env.ratios[i]
-            track[i, j] = carpet.firm_track_probability(env.pds)[i]
+            pds[i, j] = env.pds[index]
+            ratios[i, j] = env.ratios[index]
+            track[i, j] = carpet.firm_track_probability(env.pds)[index]
 
 
 plot_heatmaps_rcs_wind(pds, ratios, track)
@@ -177,9 +177,9 @@ for i, r in enumerate(rcs):
                     index = i
                 done = terminateds["__all__"]
                 i += 1
-            pds[i, j] = env.pds[i]
-            ratios[i, j] = env.ratios[i]
-            track[i, j] = carpet.firm_track_probability(env.pds)[i]
+            pds[i, j] = env.pds[index]
+            ratios[i, j] = env.ratios[index]
+            track[i, j] = carpet.firm_track_probability(env.pds)[index]
 
 
 plot_heatmaps_rcs_rainfall(pds, ratios, track)
@@ -219,8 +219,8 @@ for i, w in enumerate(wind_speed):
                     index = i
                 done = terminateds["__all__"]
                 i += 1
-            pds[i, j] = env.pds[i]
-            ratios[i, j] = env.ratios[i]
-            track[i, j] = carpet.firm_track_probability(env.pds)[i]
+            pds[i, j] = env.pds[index]
+            ratios[i, j] = env.ratios[index]
+            track[i, j] = carpet.firm_track_probability(env.pds)[index]
 
 plot_heatmaps_wind_rainfall(pds, ratios, track)
