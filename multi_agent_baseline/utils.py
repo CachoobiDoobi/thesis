@@ -263,6 +263,9 @@ def plot_2d_hist(track, ratios):
     )
     print("number of bins", num_bins_x,num_bins_y, track.shape, ratios.shape)
     # Create the 2D histogram
-    fig = go.Figure(data=go.Histogram2d(x=track, y=dict(range[0, 8]), nbinsx=num_bins_x, nbinsy=num_bins_y, histnorm='probability', zmin=0, zmax=0.3), layout=layout)
+    fig = go.Figure(
+        data=go.Histogram2d(x=track, y=ratios, xbins=dict(start=0, end=1, size=0.1),
+                            ybins=dict(start=1, end=9, size=0.5), histnorm='probability',
+                            zmin=0, zmax=0.3), layout=layout)
 
     pio.write_image(fig, '/project/multi_agent_baseline/results/2dhist.pdf')
