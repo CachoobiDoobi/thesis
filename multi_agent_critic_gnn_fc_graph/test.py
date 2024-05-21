@@ -84,6 +84,16 @@ for _ in range(num_iterations):
     pds.append(env.pds)
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
+
+pds = np.array(pds).reshape(-1)
+pds = np.round(pds, decimals=2)
+
+ratios = np.array(ratios).reshape(-1)
+ratios = np.round(ratios, decimals=2)
+
+track = np.array(track).reshape(-1)
+track = np.round(track, decimals=2)
+
 np.savetxt("/project/multi_agent_critic_gnn_fc_graph/results/pds.txt", pds)
 np.savetxt("/project/multi_agent_critic_gnn_fc_graph/results/ratios.txt", ratios)
 np.savetxt("/project/multi_agent_critic_gnn_fc_graph/results/track.txt", track)
