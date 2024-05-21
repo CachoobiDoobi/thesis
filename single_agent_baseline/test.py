@@ -56,7 +56,8 @@ def mapping_fn(agent_id, episode, worker, **kwargs):
     return 'pol1'
 
 config = (
-    PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
+    PPOConfig()
+    .environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
     .rollouts(num_rollout_workers=20)
     .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
     .framework("torch")
