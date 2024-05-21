@@ -132,8 +132,8 @@ for i, r in enumerate(rcs):
                 actions = {0: parameters_1}
                 # print(f"Parameters: {None} given observation at previous timestep: {obs}")
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
-                if np.sum(rewards.values()) > max_reward:
-                    max_reward = np.sum(rewards.values())
+                if sum(rewards.values()) > max_reward:
+                    max_reward = sum(rewards.values())
                     index = i
                 done = terminateds["__all__"]
                 i += 1
@@ -172,8 +172,8 @@ for i, r in enumerate(rcs):
                 actions = {0: parameters_1}
                 # print(f"Parameters: {None} given observation at previous timestep: {obs}")
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
-                if np.sum(rewards.values()) > max_reward:
-                    max_reward = np.sum(rewards.values())
+                if sum(rewards.values()) > max_reward:
+                    max_reward = sum(rewards.values())
                     index = i
                 done = terminateds["__all__"]
                 i += 1
@@ -214,8 +214,8 @@ for i, w in enumerate(wind_speed):
                 actions = {0: parameters_1}
                 # print(f"Parameters: {None} given observation at previous timestep: {obs}")
                 obs, rewards, terminateds, truncateds, _ = env.step(actions)
-                if np.sum(rewards.values()) > max_reward:
-                    max_reward = np.sum(rewards.values())
+                if sum(rewards.values()) > max_reward:
+                    max_reward = sum(rewards.values())
                     index = i
                 done = terminateds["__all__"]
                 i += 1
