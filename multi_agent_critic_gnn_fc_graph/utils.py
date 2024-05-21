@@ -245,13 +245,16 @@ def plot_2d_hist(track, ratios):
     ratios = np.array(ratios).reshape(-1)
     ratios = np.round(ratios, decimals=2)
 
-    iqr = np.percentile(track, 75) - np.percentile(track, 25)
-    bin_width = 2 * iqr / (len(track) ** (1 / 3))  # Freedman-Diaconis rule
-    num_bins_x = int(np.ceil((np.max(track) - np.min(track)) / bin_width))
-
-    iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
-    bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
-    num_bins_y = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
+    # iqr = np.percentile(track, 75) - np.percentile(track, 25)
+    # bin_width = 2 * iqr / (len(track) ** (1 / 3))  # Freedman-Diaconis rule
+    # num_bins_x = int(np.ceil((np.max(track) - np.min(track)) / bin_width))
+    #
+    # iqr = np.percentile(ratios, 75) - np.percentile(ratios, 25)
+    # bin_width = 2 * iqr / (len(ratios) ** (1 / 3))  # Freedman-Diaconis rule
+    # num_bins_y = int(np.ceil((np.max(ratios) - np.min(ratios)) / bin_width))
+    # Sturges rule
+    num_bins_x = int(np.ceil(np.log2(len(track)) + 1))
+    num_bins_y = int(np.ceil(np.log2(len(ratios)) + 1))
 
     layout = go.Layout(
         title='Waveform distribution',
