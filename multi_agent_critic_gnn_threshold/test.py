@@ -86,13 +86,10 @@ for _ in range(num_iterations):
 pds = np.array(pds).reshape(-1)
 ratios = np.array(ratios).reshape(-1)
 track = np.array(ratios).reshape(-1)
-with open('results/pd.npy', 'wb') as f:
-    np.save("results/pd.npy", pds)
-with open('results/ratios.npy', 'wb') as f:
-    np.save("results/ratios.npy", ratios)
-with open('results/track.npy', 'wb') as f:
-    np.save("results/track.npy", track)
 
+np.savetxt("results/pds.txt", pds)
+np.savetxt("results/ratios.txt", ratios)
+np.savetxt("results/track.txt", track)
 plot_2d_hist(track, ratios)
 # env.render_hist(pds=pds, ratios=ratios, track_probs=track)
 # env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
