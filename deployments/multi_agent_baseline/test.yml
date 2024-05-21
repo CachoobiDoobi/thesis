@@ -24,7 +24,7 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch new_test
                 --single-branch
                 project;
             cd project;
