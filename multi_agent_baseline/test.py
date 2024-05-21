@@ -82,7 +82,9 @@ for i in range(num_iterations):
     pds.append(env.pds)
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
-
+np.savetxt("/project/multi_agent_baseline/results/pds.txt", pds)
+np.savetxt("/project/multi_agent_baseline/results/ratios.txt", ratios)
+np.savetxt("/project/multi_agent_baseline/results/track.txt", track)
 plot_2d_hist(track, ratios)
 
 # env.render_hist(pds=pds, ratios=ratios, track_probs=track)
