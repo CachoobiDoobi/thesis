@@ -261,6 +261,6 @@ def plot_2d_hist(track, ratios):
         yaxis=dict(title='Waveform duration ratio')
     )
     # Create the 2D histogram
-    fig = go.Figure(data=go.Histogram2d(x=track, y=ratios, nbinsx=num_bins_x, nbinsy=num_bins_y), layout=layout)
+    fig = go.Figure(data=go.Histogram2d(x=track, y=ratios, nbinsx=num_bins_x, nbinsy=num_bins_y, histnorm='probability'), layout=layout)
 
     pio.write_image(fig, '/project/multi_agent_critic_gnn_threshold/results/2dhist.pdf')
