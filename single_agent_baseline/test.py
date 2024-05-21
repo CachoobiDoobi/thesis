@@ -111,7 +111,7 @@ num_iterations = 1
 for i, r in enumerate(rcs):
     for j, w in enumerate(wind_speed):
         for _ in range(num_iterations):
-
+            print(j * 20 + i)
             obs, _ = env.reset()
 
             env.wind_speed = w
@@ -151,7 +151,7 @@ track = np.zeros((20, 20))
 for i, r in enumerate(rcs):
     for j, w in enumerate(rainfall_rate):
         for _ in range(num_iterations):
-
+            print(j * 20 + i)
             obs, _ = env.reset()
 
             env.wind_speed = 40
@@ -193,7 +193,7 @@ track = np.zeros((20, 20))
 for i, w in enumerate(wind_speed):
     for j, r in enumerate(rainfall_rate):
         for _ in range(num_iterations):
-
+            print(j * 20 + i)
             obs, _ = env.reset()
 
             env.wind_speed = w
