@@ -45,36 +45,7 @@ ray.init()
 cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_a85c3_00000_0_2024-04-28_12-05-51/checkpoint_000000'
 
 agent = Algorithm.from_checkpoint(cdir)
-# agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
-policies = {
-    "pol1": PolicySpec(),
-}
 
-
-# Policy to agent mapping function
-def mapping_fn(agent_id, episode, worker, **kwargs):
-    return 'pol1'
-
-
-config = (
-    PPOConfig().environment(env=TrackingEnv, env_config=env_config, clip_actions=True)
-    .rollouts(num_rollout_workers=20)
-    .multi_agent(policies=policies, policy_mapping_fn=mapping_fn)
-    .framework("torch")
-    .resources(num_gpus=1, num_cpus_per_worker=2)
-    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
-    .environment(disable_env_checking=True)
-    #.evaluation_config(explore=False)
-)
-# Disable exploration during evaluation
-
-
-# Create a RolloutWorker for evaluation
-worker = RolloutWorker(
-    env_creator=lambda _: agent.env_creator(config["env_config"]),
-    policy=agent.get_policy(),
-    config=config,
-)
 
 env = TrackingEnv(env_config=env_config)
 pds = []
@@ -95,7 +66,7 @@ for i in range(num_iterations):
     env.rainfall_rate = 2.7 * 10e-7
     done = False
     while not done:
-        parameters_1 = worker.policy.compute_single_action(obs[0], policy_id='pol1')
+        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1', explore=False)
 
         actions = {0: parameters_1}
         # print(f"Parameters: {None} given observation at previous timestep: {obs}")
