@@ -1,15 +1,11 @@
-import logging
-
-import numpy as np
 import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
-from ray._private.dict import merge_dicts
 from ray.rllib import RolloutWorker
 from ray.rllib.algorithms import Algorithm, PPOConfig
 from ray.rllib.policy.policy import PolicySpec
 
-from utils import plot_heatmaps_rcs_wind, plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall
+from utils import plot_2d_hist
 from tracking_env import TrackingEnv
 
 agents = [0]
@@ -86,8 +82,8 @@ ratios = []
 track = []
 
 num_iterations = 100
-for _ in range(num_iterations):
-
+for i in range(num_iterations):
+    print(i)
     obs, _ = env.reset()
 
     env.wind_speed = 40
@@ -109,6 +105,8 @@ for _ in range(num_iterations):
     pds.append(env.pds)
     ratios.append(env.ratios)
     track.append(carpet.firm_track_probability(env.pds))
+
+plot_2d_hist(track, ratios)
 
 # env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
 # env.render_hist(pds=pds, ratios=ratios, track_probs=track)

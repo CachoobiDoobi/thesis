@@ -238,3 +238,14 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
 
     # Save the first plot to a file
     pio.write_image(fig3, '/project/single_agent_baseline/results/heatmap_wind_rain_track.pdf')
+
+def plot_2d_hist(track, ratios):
+    layout = go.Layout(
+        title='Waveform distribution',
+        xaxis=dict(title='Firm track probability'),
+        yaxis=dict(title='Waveform duration ratio')
+    )
+    # Create the 2D histogram
+    fig = go.Figure(data=go.Histogram2d(x=track, y=ratios), layout=layout)
+
+    pio.write_image(fig, '/project/single_agent_baseline/results/2dhist.pdf')
