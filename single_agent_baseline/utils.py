@@ -265,7 +265,7 @@ def plot_2d_hist(track, ratios):
     print("number of bins", num_bins_x, num_bins_y, track.shape, ratios.shape)
     # Create the 2D histogram
     fig = go.Figure(
-        data=go.Histogram2d(x=track, y=ratios, xbins=dict(start=0, end=1, size=0.1), ybins=dict(start=1, end=9, size=0.5), histnorm='probability',
+        data=go.Histogram2d(x=track, y=ratios, histnorm='probability',
                             zmin=0, zmax=0.3), layout=layout)
 
 
