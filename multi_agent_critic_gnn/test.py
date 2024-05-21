@@ -7,8 +7,7 @@ from ray.rllib.models import ModelCatalog
 
 from model import TorchCentralizedCriticModel
 from tracking_env import TrackingEnv
-from utils import plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall, plot_heatmaps_rcs_wind
-
+from utils import plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall, plot_heatmaps_rcs_wind, plot_2d_hist
 
 n_bursts = 3
 
