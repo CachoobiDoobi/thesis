@@ -71,9 +71,10 @@ for i in range(num_iterations):
     env.rainfall_rate = 2.7 * 10e-7
     done = False
     while not done:
-        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1', explore=False)
+        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+        parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 
-        actions = {0: parameters_1}
+        actions = {0: parameters_1, 1: parameters_2}
         # print(f"Parameters: {None} given observation at previous timestep: {obs}")
         obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
