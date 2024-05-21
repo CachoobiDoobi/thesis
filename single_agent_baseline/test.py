@@ -67,20 +67,17 @@ config = (
     .resources(num_gpus=1, num_cpus_per_worker=2)
     .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
     .environment(disable_env_checking=True)
+    .evaluation_config(explore=False)
 
 )
 # Disable exploration during evaluation
-evaluation_config = config.copy()
-evaluation_config["explore"] = False
 
-# Merge evaluation config with the original config
-merged_config = merge_dicts(agent.config, evaluation_config.to_dict())
 
 # Create a RolloutWorker for evaluation
 worker = RolloutWorker(
-    env_creator=lambda _: agent.env_creator(merged_config["env_config"]),
+    env_creator=lambda _: agent.env_creator(config["env_config"]),
     policy=agent.get_policy(),
-    config=merged_config,
+    config=config,
 )
 
 env = TrackingEnv(env_config=env_config)
