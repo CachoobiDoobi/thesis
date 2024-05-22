@@ -111,7 +111,7 @@ num_iterations = 1
 for i, r in enumerate(rcs):
     for j, w in enumerate(wind_speed):
         for _ in range(num_iterations):
-            print(j * 20 + i)
+            print(i * 20 + j)
             obs, _ = env.reset()
 
             env.wind_speed = w
