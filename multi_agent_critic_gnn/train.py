@@ -83,15 +83,20 @@ config = (
         else "pol2",
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    .resources(num_gpus=1, num_cpus_per_worker=2)
-    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    .resources(num_gpus=1, num_cpus_per_worker=2,)
+    .training(train_batch_size=tune.grid_search([256, 512, 1024, 2048]),
+              sgd_minibatch_size=tune.grid_search([32, 64, 128]),
+              num_sgd_iter=tune.grid_search([20, 30]),
+              lambda_=tune.grid_search([0.9, 0.95, 0.99]),
+              lr=tune.grid_search([0.0001, 0.0003, 0.001, 0.003, 0.01])
+              )
 )
 
 stop = {
-    # "training_iteration": 1,
+    "training_iteration": 1,
     # "timesteps_total": args.stop_timesteps,
     # "episode_reward_mean": 10,
-    "time_total_s": 3600 * 18
+    # "time_total_s": 3600 * 18
 }
 
 storage = '/project/multi_agent_critic_gnn/results'
@@ -101,7 +106,7 @@ tuner = tune.Tuner(
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
                              storage_path=storage,
-                             name="multiagent_cc_7layers"),
+                             name="tuning",)
 )
 results = tuner.fit()
 
