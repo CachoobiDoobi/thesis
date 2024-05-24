@@ -68,12 +68,17 @@ config = (
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
     .resources(num_gpus=1, num_cpus_per_worker=2)
-    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
+    .training(train_batch_size=tune.grid_search([256, 512, 1024, 2048]),
+              sgd_minibatch_size=tune.grid_search([32, 64, 128]),
+              num_sgd_iter=tune.grid_search([20, 30]),
+              lambda_=tune.grid_search([0.9, 0.95, 0.99]),
+              lr=tune.grid_search([0.0001, 0.0003, 0.001, 0.003, 0.01])
+              )
 )
 
 stop = {
-    # "training_iteration": 1,
-    "time_total_s": 3600 * 18
+    "training_iteration": 1,
+    # "time_total_s": 3600 * 18
     # "episode_reward_mean": 10,
     # "episodes_total": 900
 }
