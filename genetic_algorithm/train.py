@@ -1,15 +1,33 @@
 import math
 import random
 import time
+from datetime import datetime, timedelta
 
 import numpy as np
 from deap import base, creator, tools, algorithms
 from gymnasium.spaces import Dict, MultiDiscrete, Box
-from config import param_dict
-from carpet_simulation import CarpetSimulation
 from scipy.constants import c
+from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, \
+    ConstantVelocity
+from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
 
-from tracking_env import TrackingEnv
+from carpet_simulation import CarpetSimulation
+from config import param_dict
+import math
+import random
+import time
+from datetime import datetime, timedelta
+
+import numpy as np
+from deap import base, creator, tools, algorithms
+from gymnasium.spaces import Dict, MultiDiscrete, Box
+from scipy.constants import c
+from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, \
+    ConstantVelocity
+from stonesoup.types.groundtruth import GroundTruthPath, GroundTruthState
+
+from carpet_simulation import CarpetSimulation
+from config import param_dict
 
 n_bursts = 6
 
@@ -35,7 +53,6 @@ observation_space = Dict(
 )
 
 
-
 # Function to initialize an individual
 def initIndividual(icls):
     pulse_durations = np.random.randint(low=0, high=5, size=n_bursts)
@@ -48,7 +65,7 @@ def initIndividual(icls):
 
 
 # Evaluation function
-def evalFunction(individual):
+def evalFunction(individual, range_, velocity, altitude, rainfall_rate=2.8 * 10e-7, wind_speed=40, rcs=1):
     sim = CarpetSimulation()
     action_dict = {
         "pulse_duration": individual[:n_bursts],
@@ -57,10 +74,11 @@ def evalFunction(individual):
         "RF": individual[3 * n_bursts:]
     }
     try:
-        pds, snr = sim.detect(action_dict, velocity=100, range_=20000, altitude=15, rainfall_rate=2.8 * 10e-7,
-                              wind_speed=40, rcs=1)
+        pds, snr = sim.detect(action_dict, velocity=velocity, range_=range_, altitude=altitude,
+                              rainfall_rate=rainfall_rate,
+                              wind_speed=wind_speed, rcs=rcs)
     except ValueError:
-        return (0,)
+        return (0,0)
 
     reward_pd = np.mean(pds)
 
@@ -73,16 +91,16 @@ def evalFunction(individual):
     ratio = duration / min_duration
 
     sigma = 1.6
-    reward_time = math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
-    # print(ratio, reward_time, reward_pd)
-    return reward_time + reward_pd,
+    # reward_time = math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
+    # print(ratio, reward_time, reward_d)
+    return reward_pd, ratio
 
 
-def main():
-    start_time = time.time()
+def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
+    # start_time = time.time()
     # Define the problem as a maximization problem
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+    creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
+    creator.create("Individual", list, fitness=creator.FitnessMulti)
     toolbox = base.Toolbox()
     toolbox.register("individual", initIndividual, creator.Individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -95,28 +113,66 @@ def main():
 
     random.seed(42)
 
-    # Create the population
-    pop = toolbox.population(n=100)
+    start_time = datetime.now()
 
-    # Define the number of generations
-    ngen = 30
-    # Define the probability of mating two individuals
-    cxpb = 0.5
-    # Define the probability of mutating an individual
-    mutpb = 0.2
+    transition_model_altitude = CombinedLinearGaussianTransitionModel([ConstantVelocity(100)])
 
-    # Run the genetic algorithm
-    algorithms.eaSimple(pop, toolbox, cxpb, mutpb, ngen, verbose=True)
+    transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
 
-    # Get the best individual
-    best_ind = tools.selBest(pop, 1)[0]
-    print(f"Best individual is {best_ind} with fitness {best_ind.fitness.values[0]}")
+    truth_alt = GroundTruthPath(
+        [GroundTruthState([np.random.uniform(10, 30), np.random.uniform(1, 3)], timestamp=start_time)])
+
+    # 1d model
+    truth = GroundTruthPath(
+        [GroundTruthState([np.random.uniform(1e4, 5e4), np.random.uniform(100, 500)], timestamp=start_time)])
+
+    for k in range(1, 21):
+        truth.append(GroundTruthState(
+            transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+            timestamp=start_time + timedelta(seconds=k)))
+        truth_alt.append(GroundTruthState(
+            transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+            timestamp=start_time + timedelta(seconds=k)))
+        # print(truth[k].state_vector[0], truth[k].state_vector[1])
+
+
+    pds = []
+    ratios = []
+    start_time = time.time()
+    for i in range(20):
+                range_ = truth[i].state_vector[0]
+                velocity = truth[i].state_vector[1]
+                alt = truth_alt[i].state_vector[0]
+                altitude = alt if alt > 0 else abs(alt)
+                # Create the population
+                pop = toolbox.population(n=300)
+
+                # Define the number of generations
+                ngen = 50
+                # Define the probability of mating two individuals
+                cxpb = 0.5
+                # Define the probability of mutating an individual
+                mutpb = 0.2
+
+                # Redefine evaluation function with fixed range, velocity, and altitude
+                evalFunctionFixed = lambda ind: evalFunction(ind, range_=range_, velocity=velocity,
+                                                             altitude=altitude, wind_speed=wind_speed, rcs=rcs, rainfall_rate=rainfall_rate)
+                toolbox.register("evaluate", evalFunctionFixed)
+
+                # Run the genetic algorithm
+                algorithms.eaSimple(pop, toolbox, cxpb, mutpb, ngen, verbose=False)
+
+                # Get the best individual
+                best_ind = tools.selBest(pop, 1)[0]
+                # print(
+                #     f"For range={range_}, velocity={velocity}, altitude={altitude}, best individual is {best_ind} with fitness {best_ind.fitness.values}")
+                pds.append(best_ind.fitness.values[0])
+                ratios.append(best_ind.fitness.values[1])
 
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f'Elapsed time: {elapsed_time} seconds')
-    return pop
-
+    return pds, ratios
 
 if __name__ == "__main__":
-    main()
+    train()

@@ -1,5 +1,6 @@
 import os
 import pprint
+import time
 
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray import tune, air
@@ -112,6 +113,7 @@ env.rcs = 1
 env.rainfall_rate = 2.7 * 10e-7
 
 done = False
+start_time = time.time()
 while not done:
     parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
     parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
@@ -121,4 +123,7 @@ while not done:
     obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
     done = terminateds["__all__"]
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f'Elapsed time: {elapsed_time} seconds')
 env.render()

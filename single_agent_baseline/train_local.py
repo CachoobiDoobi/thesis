@@ -1,5 +1,6 @@
 import os
 import pprint
+import time
 
 import numpy as np
 import ray
@@ -65,7 +66,7 @@ config = (
 )
 
 stop = {
-    "training_iteration": 1,
+    "training_iteration": 10,
     # "time_total_s": 3600 * 18
     # "episode_reward_mean": 10,
     # "episodes_total": 900
@@ -102,16 +103,18 @@ env.altitude = 10
 env.rcs = 1
 
 env.rainfall_rate = 2.7 * 10e-7
-print("weights: ", agent.get_policy('pol1').get_weights().keys())
 values = agent.get_policy('pol1').get_weights().values()
 values = [ np.array(v).size for v in values]
-print(values)
 done = False
+start_time = time.time()
 while not done:
     parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
     actions = {0: parameters_1}
-    # print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
+    print(f"Parameters: {actions} given observation at previous timestep: {obs}")
     obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
     done = terminateds["__all__"]
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f'Elapsed time: {elapsed_time} seconds')
 env.render()

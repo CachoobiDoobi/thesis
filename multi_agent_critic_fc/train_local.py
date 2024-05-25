@@ -85,7 +85,7 @@ config = (
     )
     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
     .resources(num_gpus=0, num_cpus_per_worker=1)
-    .training(train_batch_size=128, sgd_minibatch_size=32, num_sgd_iter=20)
+    .training(train_batch_size=512, sgd_minibatch_size=128, num_sgd_iter=30)
 )
 
 stop = {
@@ -95,14 +95,14 @@ stop = {
     # "time_total_s": 3600 * 18
 }
 
-storage = '/project/multi_agent_critic_gnn/results'
+storage = '/project/multi_agent_critic_fc/results'
 
 tuner = tune.Tuner(
     CentralizedCritic,
     param_space=config.to_dict(),
     run_config=air.RunConfig(stop=stop, verbose=1,
                              storage_path=storage,
-                             name="multiagent_cc_7layers"),
+                             name="multiagent_cc_fc"),
 )
 results = tuner.fit()
 
