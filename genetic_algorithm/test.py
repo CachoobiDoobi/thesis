@@ -6,7 +6,7 @@ from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
 
-from genetic_algorithm.train import train
+from train import train
 from utils import plot_heatmaps_rcs_wind, plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall
 from tracking_env import TrackingEnv
 
