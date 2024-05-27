@@ -1,14 +1,15 @@
 import logging
-
 import numpy as np
 import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
-
 from train import train
 from utils import plot_heatmaps_rcs_wind, plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall
 from tracking_env import TrackingEnv
+
+# Initialize Ray
+ray.init()
 
 agents = [0]
 n_bursts = 6
@@ -48,10 +49,14 @@ ratios = []
 track = []
 
 num_iterations = 20
+
+# # Make sure train is a Ray remote function
+# train_remote = ray.remote(train)
+
 for i in range(num_iterations):
     print(i, "hist")
-    pd, ratio = train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7)
-
+    pd_ratio_ref = train.remote(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7)
+    pd, ratio = ray.get(pd_ratio_ref)
     pds.append(pd)
     ratios.append(ratio)
     track.append(carpet.firm_track_probability(pd))
@@ -75,10 +80,13 @@ num_iterations = 5
 
 for i, r in enumerate(rcs):
     for j, w in enumerate(wind_speed):
+        futures = []
         for k in range(num_iterations):
-            print(i*20 + j, k, "rcs vs wind")
-            pd, ratio = train(wind_speed=w, rcs=r, rainfall_rate=2.8 * 10e-7)
+            print(i * 20 + j, k, "rcs vs wind")
+            futures.append(train.remote(wind_speed=w, rcs=r, rainfall_rate=2.8 * 10e-7))
 
+        results = ray.get(futures)
+        for pd, ratio in results:
             pds[i, j] += np.mean(pd)
             ratios[i, j] += np.mean(ratio)
             track[i, j] += np.mean(carpet.firm_track_probability(pd))
@@ -95,10 +103,13 @@ track = np.zeros((20, 20))
 
 for i, r in enumerate(rcs):
     for j, w in enumerate(rainfall_rate):
+        futures = []
         for k in range(num_iterations):
-            print(i*20 + j,k, "rcs vs rainfall")
-            pd, ratio = train(wind_speed=40, rcs=r, rainfall_rate=w)
+            print(i * 20 + j, k, "rcs vs rainfall")
+            futures.append(train.remote(wind_speed=40, rcs=r, rainfall_rate=w))
 
+        results = ray.get(futures)
+        for pd, ratio in results:
             pds[i, j] += np.mean(pd)
             ratios[i, j] += np.mean(ratio)
             track[i, j] += np.mean(carpet.firm_track_probability(pd))
@@ -117,11 +128,13 @@ track = np.zeros((20, 20))
 
 for i, w in enumerate(wind_speed):
     for j, r in enumerate(rainfall_rate):
+        futures = []
         for k in range(num_iterations):
-            print(i*20 + j,k, "rain vs wind")
+            print(i * 20 + j, k, "rain vs wind")
+            futures.append(train.remote(wind_speed=w, rcs=1, rainfall_rate=r))
 
-            pd, ratio = train(wind_speed=w, rcs=1, rainfall_rate=r)
-
+        results = ray.get(futures)
+        for pd, ratio in results:
             pds[i, j] += np.mean(pd)
             ratios[i, j] += np.mean(ratio)
             track[i, j] += np.mean(carpet.firm_track_probability(pd))

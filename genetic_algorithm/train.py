@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 import numpy as np
+import ray
 from deap import base, creator, tools, algorithms
 from gymnasium.spaces import Dict, MultiDiscrete, Box
 from scipy.constants import c
@@ -96,6 +97,7 @@ def evalFunction(individual, range_, velocity, altitude, rainfall_rate=2.8 * 10e
     return reward_pd, ratio
 
 
+@ray.remote
 def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
     # start_time = time.time()
     # Define the problem as a maximization problem

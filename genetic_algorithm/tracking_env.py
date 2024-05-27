@@ -331,7 +331,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Value"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
+        pio.write_image(fig1, '/project/genetic_algorithm/results/probability_of_detection.pdf')
 
         # Create Plotly figure for the second plot (Waveform duration ratio)
         fig2 = go.Figure()
@@ -364,7 +364,7 @@ class TrackingEnv(MultiAgentEnv):
             showlegend=False
         ))
         # Save the second plot to a file
-        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+        pio.write_image(fig2, '/project/genetic_algorithm/results/waveform_duration_ratio.pdf')
 
         fig3 = go.Figure()
         fig3.add_trace(
@@ -396,7 +396,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Probability"
         )
         # Save the second plot to a file
-        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
+        pio.write_image(fig3, '/project/genetic_algorithm/results/firm_track_prob.pdf')
 
 
     def render_hist(self, pds, ratios, track_probs):
@@ -416,7 +416,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Normalized count"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection.pdf')
+        pio.write_image(fig1, '/project/genetic_algorithm/results/probability_of_detection.pdf')
 
         ratios = np.array(ratios).reshape(-1)
 
@@ -432,7 +432,7 @@ class TrackingEnv(MultiAgentEnv):
             xaxis_title="Duration ratio",
             yaxis_title="Normalized count"
         )
-        pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+        pio.write_image(fig2, '/project/genetic_algorithm/results/waveform_duration_ratio.pdf')
 
         track_probs = np.array(track_probs).reshape(-1)
 
@@ -450,7 +450,7 @@ class TrackingEnv(MultiAgentEnv):
         )
 
         # Save the second plot to a file
-        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob.pdf')
+        pio.write_image(fig3, '/project/genetic_algorithm/results/firm_track_prob.pdf')
 
     def render_hist_treshold(self, pds, ratios, track_probs, treshold=0.9):
 
@@ -471,7 +471,7 @@ class TrackingEnv(MultiAgentEnv):
             yaxis_title="Normalized count"
         )
         # Save the first plot to a file
-        pio.write_image(fig1, '/project/single_agent_baseline/results/probability_of_detection_filtered.pdf')
+        pio.write_image(fig1, '/project/genetic_algorithm/results/probability_of_detection_filtered.pdf')
 
         # ratios = np.array(ratios).reshape(-1)
         #
@@ -487,7 +487,7 @@ class TrackingEnv(MultiAgentEnv):
         #     xaxis_title="Time",
         #     yaxis_title="Value"
         # )
-        # pio.write_image(fig2, '/project/single_agent_baseline/results/waveform_duration_ratio.pdf')
+        # pio.write_image(fig2, '/project/genetic_algorithm/results/waveform_duration_ratio.pdf')
 
         track_probs = np.array(track_probs).reshape(-1)
         filter = track_probs >= treshold
@@ -507,4 +507,4 @@ class TrackingEnv(MultiAgentEnv):
         )
 
         # Save the second plot to a file
-        pio.write_image(fig3, '/project/single_agent_baseline/results/firm_track_prob_filtered.pdf')
+        pio.write_image(fig3, '/project/genetic_algorithm/results/firm_track_prob_filtered.pdf')

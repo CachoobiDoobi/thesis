@@ -112,7 +112,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     fig1 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_rcs_wind_pd.pdf')
+    pio.write_image(fig1, '/project/genetic_algorithm/results/heatmap_rcs_wind_pd.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=ratios, x=wind_speed, y=rcs, zmin=3, zmax=7)
@@ -127,7 +127,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     fig2 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_rcs_wind_ratios.pdf')
+    pio.write_image(fig2, '/project/genetic_algorithm/results/heatmap_rcs_wind_ratios.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=track, x=wind_speed, y=rcs, zmin=0.6, zmax=1)
@@ -142,7 +142,7 @@ def plot_heatmaps_rcs_wind(pds, ratios, track):
     fig3 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig3, '/project/single_agent_baseline/results/heatmap_rcs_wind_track.pdf')
+    pio.write_image(fig3, '/project/genetic_algorithm/results/heatmap_rcs_wind_track.pdf')
 
 
 
@@ -160,7 +160,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     fig1 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_rcs_rain_pd.pdf')
+    pio.write_image(fig1, '/project/genetic_algorithm/results/heatmap_rcs_rain_pd.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=rcs, zmin=3, zmax=7)
@@ -175,7 +175,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     fig2 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_rcs_rain_ratios.pdf')
+    pio.write_image(fig2, '/project/genetic_algorithm/results/heatmap_rcs_rain_ratios.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=track, x=rainfall_rate, y=rcs, zmin=0.6, zmax=1)
@@ -190,7 +190,7 @@ def plot_heatmaps_rcs_rainfall(pds, ratios, track):
     fig3 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig3, '/project/single_agent_baseline/results/heatmap_rcs_rain_track.pdf')
+    pio.write_image(fig3, '/project/genetic_algorithm/results/heatmap_rcs_rain_track.pdf')
 
 
 def plot_heatmaps_wind_rainfall(pds, ratios, track):
@@ -207,7 +207,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     fig1 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig1, '/project/single_agent_baseline/results/heatmap_wind_rain_pd.pdf')
+    pio.write_image(fig1, '/project/genetic_algorithm/results/heatmap_wind_rain_pd.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=ratios, x=rainfall_rate, y=wind_speed, zmin=3, zmax=7)
@@ -222,7 +222,7 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     fig2 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig2, '/project/single_agent_baseline/results/heatmap_wind_rain_ratios.pdf')
+    pio.write_image(fig2, '/project/genetic_algorithm/results/heatmap_wind_rain_ratios.pdf')
 
     # Create a heatmap trace
     heatmap = go.Heatmap(z=track, x=rainfall_rate, y=wind_speed, zmin=0.6, zmax=1)
@@ -237,4 +237,4 @@ def plot_heatmaps_wind_rainfall(pds, ratios, track):
     fig3 = go.Figure(data=heatmap, layout=layout)
 
     # Save the first plot to a file
-    pio.write_image(fig3, '/project/single_agent_baseline/results/heatmap_wind_rain_track.pdf')
+    pio.write_image(fig3, '/project/genetic_algorithm/results/heatmap_wind_rain_track.pdf')
