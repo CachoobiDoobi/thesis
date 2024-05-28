@@ -92,6 +92,7 @@ env.truth_alt = truth_alt
 # set filters to be number of pusles everytime
 # set 34 max range
 # make altitude constant
+#
 env.wind_speed = 18
 
 env.altitude = 15

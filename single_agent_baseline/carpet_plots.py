@@ -49,6 +49,9 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
                 setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
                 setattr(carpet, f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
+                setattr(carpet, f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
+                setattr(carpet, f"Transmitter_NrFilters{i}", int(n_pulseses[n - 1]))
+                # carpet.Transmitter_NrFilters
 
         assert range_ > 0, "NEGATIVE RANGE"
 
@@ -89,4 +92,4 @@ alts = np.loadtxt("alts.txt")
 
 for i in range(10):
     sim = CarpetSimulation()
-    sim.detect(actions[0], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=40, rcs=1, rainfall_rate=2.7 * 10e-7)
+    sim.detect(actions[0], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
