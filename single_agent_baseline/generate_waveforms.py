@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import ray
@@ -61,6 +61,14 @@ truth_alt = GroundTruthPath(
 # 1d model
 truth = GroundTruthPath(
     [GroundTruthState([4e4, 300], timestamp=start_time)])
+
+for k in range(1, 20):
+    truth.append(GroundTruthState(
+        transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+        timestamp=start_time + timedelta(seconds=k)))
+    truth_alt.append(GroundTruthState(
+        transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+        timestamp=start_time + timedelta(seconds=k)))
 
 env = TrackingEnv(env_config=env_config)
 pds = []
