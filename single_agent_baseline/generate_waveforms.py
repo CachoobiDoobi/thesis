@@ -60,7 +60,7 @@ truth_alt = GroundTruthPath(
 
 # 1d model
 truth = GroundTruthPath(
-    [GroundTruthState([np.random.uniform(1e4, 5e4), np.random.uniform(100, 500)], timestamp=start_time)])
+    [GroundTruthState(4e4, 300, timestamp=start_time)])
 
 env = TrackingEnv(env_config=env_config)
 pds = []
@@ -72,6 +72,8 @@ velocities = []
 alts = []
 
 obs, _ = env.reset()
+env.truth = truth
+env.truth_alt = truth_alt
 
 env.wind_speed = 40
 
