@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+
+# https://kubernetes.io/docs/concepts/workloads/controllers/job/
+kind: Job
+metadata:
+  name: generate-single-baseline
+  namespace: gaghir-thesis
+spec:
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 4
+  template:
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+      - name: gaghir-thesis-rtkubtemp
+        persistentVolumeClaim:
+          claimName: gaghir-thesis-rtkubtemp-claim
+      containers:
+      - name: thesis
+        image: gitlab.tsn.tno.nl:4567/gaghir/thesis:latest
+        #mac_address: C4-65-16-00-49-94
+        command:
+          - /bin/bash
+        args:
+          - -c
+          - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
+                --branch genetic_algorithm
+                --single-branch
+                project;
+            cd project;
+            python3  single_agent_baseline/generate_waveforms.py;
+            cd;
+            cp -r  /project/single_agent_baseline/results /nas-tmp/Radu/baseline;"
+          # pyenv install 3.9.0;
+          #            poetry self update;
+          #            poetry lock;
+          #            poetry install;
+        resources:
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          limits:
+            cpu: '50'
+            memory: 50Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '40'
+            memory: 40Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /nas-tmp
+          name: gaghir-thesis-rtkubtemp
+      restartPolicy: Never
+      # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      imagePullSecrets:
+      - name: baseline-image
