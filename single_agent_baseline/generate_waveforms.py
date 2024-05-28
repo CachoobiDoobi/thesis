@@ -89,7 +89,7 @@ env.altitude = 10
 
 env.rcs = 1
 
-env.rainfall_rate = 2.7 * 10e-7
+env.rainfall_rate = 0
 done = False
 while not done:
     range = env.truth[env.timesteps].state_vector[0]
