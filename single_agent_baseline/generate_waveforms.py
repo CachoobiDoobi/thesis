@@ -84,9 +84,9 @@ env.rcs = 1
 env.rainfall_rate = 2.7 * 10e-7
 done = False
 while not done:
-    range = env.truth[env.timesteps - 1].state_vector[0]
-    velocity = env.truth[env.timesteps - 1].state_vector[1]
-    alt = env.truth_alt[env.timesteps - 1].state_vector[0]
+    range = env.truth[env.timesteps].state_vector[0]
+    velocity = env.truth[env.timesteps].state_vector[1]
+    alt = env.truth_alt[env.timesteps].state_vector[0]
     alt = alt if alt > 0 else abs(alt)
 
     ranges.append(range)
