@@ -20,6 +20,7 @@ class CarpetSimulation:
         # what is this?
         carpet.Processing_M = 3
 
+
     def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs, rainfall_rate):
         carpet.Target_Azimuth = 0
         carpet.Processing_DFB = True
@@ -29,10 +30,11 @@ class CarpetSimulation:
         carpet.Target_RCS1 = rcs
         carpet.Propagation_WindDirection = np.pi
         carpet.Propagation_Vwind = wind_speed
-        carpet.Clutter_RainPresent = True
+        carpet.Clutter_RainPresent = False
         carpet.Clutter_RainfallRate = rainfall_rate
         # what is this?
         carpet.Processing_M = 3
+
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]
             pulse_durations = parameters.get("pulse_duration")
@@ -50,15 +52,17 @@ class CarpetSimulation:
 
         assert range_ > 0, "NEGATIVE RANGE"
 
-        carpet.Target_GroundRange = range_
-        carpet.Target_RadialVelocity = velocity
-        carpet.Target_Altitude = altitude
+        # carpet.Target_GroundRange = range_
+        # carpet.Target_RadialVelocity = velocity
+        # carpet.Target_Altitude = altitude
 
         # pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
         # scnr = carpet.signal_clutter_noise_power_ratio(ground_ranges=range_, radial_velocities=velocity,altitudes=altitude)
 
         data = carpet.detection_probability(ground_ranges=np.linspace(start=1e4, stop=5e4, num=1000),
-                                            radial_velocities=np.linspace(start=100, stop=500, num=500))
+                                            radial_velocities=np.linspace(start=100, stop=500, num=500), altitudes=altitude)
+
+        carpet.save_config("carpet_radu")
         print(data.shape)
         # # Create a heatmap trace
         heatmap = go.Heatmap(z=data,x=np.linspace(start=1e4, stop=5e4, num=1000),y=np.linspace(start=100, stop=500, num=500), zmin=0, zmax=1)

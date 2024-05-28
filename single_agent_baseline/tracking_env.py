@@ -127,7 +127,7 @@ class TrackingEnv(MultiAgentEnv):
 
         range = self.truth[self.timesteps - 1].state_vector[0]
         velocity = self.truth[self.timesteps - 1].state_vector[1]
-        alt = self.truth_alt[self.timesteps - 1].state_vector[0]
+        alt = 15#elf.truth_alt[self.timesteps - 1].state_vector[0]
         alt = alt if alt > 0 else abs(alt)
 
         pds, scnr = self.sim.detect(action_dict=action_dict, range_=range, velocity=velocity, altitude=alt,
@@ -176,7 +176,7 @@ class TrackingEnv(MultiAgentEnv):
                                                                                                                 size=(
                                                                                                                     1,))))
 
-        alt_hat = self.truth_alt[self.timesteps - 1].state_vector[0] * np.random.normal(1, 0.25)
+        alt_hat = 15#self.truth_alt[self.timesteps - 1].state_vector[0] * np.random.normal(1, 0.25)
         alt_hat = np.array([alt_hat], dtype=np.float32)
         # print(range, vel, r_hat, v_hat, self.range_uncertainty, self.velocity_uncertainty)
         # for now 2 agents

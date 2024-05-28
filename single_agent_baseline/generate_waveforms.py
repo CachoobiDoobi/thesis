@@ -83,18 +83,26 @@ obs, _ = env.reset()
 env.truth = truth
 env.truth_alt = truth_alt
 
-env.wind_speed = 40
 
-env.altitude = 10
+# max wind speed should be 18m/s
+# rainfall rate - 4 mm/hour
+# rain clutter set rain range = 0
+# diameter = 100
+# vary pulses duration betwen 1 and 40 microseconds
+# set filters to be number of pusles everytime
+# set 34 max range
+# make altitude constant
+env.wind_speed = 18
+
+env.altitude = 15
 
 env.rcs = 1
 
-env.rainfall_rate = 0
+env.rainfall_rate = (2.8 * 10e-7) / 25
 done = False
 while not done:
     range = env.truth[env.timesteps].state_vector[0]
     velocity = env.truth[env.timesteps].state_vector[1]
-    alt = env.truth_alt[env.timesteps].state_vector[0]
     alt = alt if alt > 0 else abs(alt)
 
     ranges.append(range)
