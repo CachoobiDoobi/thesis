@@ -147,10 +147,10 @@ def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
                 alt = truth_alt[i].state_vector[0]
                 altitude = alt if alt > 0 else abs(alt)
                 # Create the population
-                pop = toolbox.population(n=300)
+                pop = toolbox.population(n=15)
 
                 # Define the number of generations
-                ngen = 50
+                ngen = 10
                 # Define the probability of mating two individuals
                 cxpb = 0.5
                 # Define the probability of mutating an individual
@@ -177,4 +177,5 @@ def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
     return pds, ratios
 
 if __name__ == "__main__":
-    train()
+    # train()
+    train.remote()

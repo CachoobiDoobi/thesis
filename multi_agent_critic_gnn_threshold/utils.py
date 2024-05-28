@@ -90,7 +90,7 @@ def build_graphs_from_batch(bursts):
 
         edge_weights = [data['weight'] for _, _, data in graph.edges(data=True)]
         edge_weights_tensor = torch.tensor(edge_weights, dtype=torch.float)
-        print(f'The number of edges is: {graph.number_of_edges()}, edge weights: {edge_weights_tensor}')
+        # print(f'The number of edges is: {graph.number_of_edges()}, edge weights: {edge_weights_tensor}')
         data = Data(x=node_features,
                     edge_index=edge_indices, edge_attr=edge_weights_tensor)
         data_list.append(data)
