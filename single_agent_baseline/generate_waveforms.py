@@ -105,4 +105,4 @@ np.savetxt("/project/single_agent_baseline/results/pds.txt", pds)
 np.savetxt("/project/single_agent_baseline/results/ratios.txt", ratios)
 np.savetxt("/project/single_agent_baseline/results/track.txt", track)
 
-np.savetxt("/project/single_agent_baseline/results/waveforms.txt", waveforms)
+np.save("/project/single_agent_baseline/results/waveforms.txt", waveforms)
