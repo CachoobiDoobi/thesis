@@ -119,7 +119,8 @@ while not done:
     parameters_2 = agent.compute_single_action(obs[1], policy_id='pol2')
 
     actions = {0: parameters_1, 1: parameters_2}
-    # print(f"Parameters: {parameters} given observation at previous timestep: {obs}")
+    print(f"Parameters: {parameters_1} given observation at previous timestep: {obs}")
+    print(f"Parameters: {parameters_2} given observation at previous timestep: {obs}")
     obs, rewards, terminateds, truncateds, _ = env.step(actions)
 
     done = terminateds["__all__"]
