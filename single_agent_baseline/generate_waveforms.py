@@ -67,6 +67,9 @@ pds = []
 ratios = []
 track = []
 waveforms = []
+ranges = []
+velocities = []
+alts = []
 
 obs, _ = env.reset()
 
@@ -79,6 +82,15 @@ env.rcs = 1
 env.rainfall_rate = 2.7 * 10e-7
 done = False
 while not done:
+    range = env.truth[env.timesteps - 1].state_vector[0]
+    velocity = env.truth[env.timesteps - 1].state_vector[1]
+    alt = env.truth_alt[env.timesteps - 1].state_vector[0]
+    alt = alt if alt > 0 else abs(alt)
+
+    ranges.append(range)
+    velocities.append(velocity)
+    alts.append(alt)
+
     parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
 
     actions = {0: parameters_1}
@@ -106,3 +118,8 @@ np.savetxt("/project/single_agent_baseline/results/ratios.txt", ratios)
 np.savetxt("/project/single_agent_baseline/results/track.txt", track)
 
 np.save("/project/single_agent_baseline/results/waveforms.txt", waveforms)
+
+
+np.savetxt("/project/single_agent_baseline/results/ranges.txt", ranges)
+np.savetxt("/project/single_agent_baseline/results/velocities.txt", velocities)
+np.savetxt("/project/single_agent_baseline/results/alts.txt", alts)

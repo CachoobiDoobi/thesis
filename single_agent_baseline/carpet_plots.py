@@ -1,0 +1,86 @@
+import logging
+import math
+import platform
+
+import numpy as np
+from carpet import carpet
+import plotly.graph_objs as go
+from config import param_dict
+
+
+class CarpetSimulation:
+    def __init__(self):
+        if platform.system() == 'Linux':
+            # carpet.read_license("Przlwkofsky")
+            carpet.read_license("/project/carpet3.lcs")
+        # Processing
+        carpet.Processing_DFB = True
+        carpet.Processing_MTI = 'no'
+        carpet.Processing_Integrator = 'm out n'
+        # what is this?
+        carpet.Processing_M = 3
+
+    def detect(self, action_dict, range_, velocity, altitude, wind_speed, rcs, rainfall_rate):
+        carpet.Target_Azimuth = 0
+        carpet.Processing_DFB = True
+        carpet.Processing_MTI = 'no'
+        carpet.Processing_Integrator = 'm out n'
+        carpet.Clutter_SurfaceClutter = True
+        carpet.Target_RCS1 = rcs
+        carpet.Propagation_WindDirection = np.pi
+        carpet.Propagation_Vwind = wind_speed
+        carpet.Clutter_RainPresent = True
+        carpet.Clutter_RainfallRate = rainfall_rate
+        # what is this?
+        carpet.Processing_M = 3
+        for m, agent in enumerate(action_dict):
+            parameters = action_dict[agent]
+            pulse_durations = parameters.get("pulse_duration")
+            n_pulseses = parameters.get('n_pulses')
+            pris = parameters.get('PRI')
+            n_bursts = len(pris)
+            rfs = parameters.get('RF')
+
+            for n in range(1, n_bursts + 1):
+                i = str(n + m * n_bursts)
+                setattr(carpet, f"Transmitter_PRF{i}", 1 / param_dict["PRI"][pris[n - 1]])
+                setattr(carpet, f"Transmitter_Tau{i}", param_dict["pulse_duration"][pulse_durations[n - 1]])
+                setattr(carpet, f"Transmitter_PulsesPerBurst{i}", int(n_pulseses[n - 1]))
+                setattr(carpet, f"Transmitter_RF{i}", int(param_dict['RF'][rfs[n - 1]]))
+
+        assert range_ > 0, "NEGATIVE RANGE"
+
+        carpet.Target_GroundRange = range_
+        carpet.Target_RadialVelocity = velocity
+        carpet.Target_Altitude = altitude
+
+        # pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
+        # scnr = carpet.signal_clutter_noise_power_ratio(ground_ranges=range_, radial_velocities=velocity,altitudes=altitude)
+
+        data = carpet.detection_probability(ground_ranges=np.linspace(start=1e4, stop=5e4, num=1000),
+                                            radial_velocities=np.linspace(start=100, stop=500, num=500))
+        print(data.shape)
+        # # Create a heatmap trace
+        heatmap = go.Heatmap(z=data, zmin=0, zmax=1)
+
+        layout = go.Layout(
+            title='PD',
+            xaxis=dict(title='Range'),
+            yaxis=dict(title='Velocity')
+        )
+
+        # Create figure
+        fig1 = go.Figure(data=heatmap, layout=layout)
+
+        fig1.show()
+
+
+actions = np.load("waveforms.txt.npy", allow_pickle=True)
+print(actions)
+ranges = np.loadtxt("/project/single_agent_baseline/results/ranges.txt")
+velocities = np.loadtxt("/project/single_agent_baseline/results/velocities.txt")
+alts = np.loadtxt("/project/single_agent_baseline/results/alts.txt")
+
+for i in range(20):
+    sim = CarpetSimulation()
+    sim.detect(actions[0], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=40, rcs=1, rainfall_rate=2.7 * 10e-7)
