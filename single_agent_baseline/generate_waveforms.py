@@ -88,7 +88,7 @@ env.truth_alt = truth_alt
 # rainfall rate - 4 mm/hour
 # rain clutter set rain range = 0
 # diameter = 100
-# vary pulses duration betwen 1 and 40 microseconds
+# vary pulses duration between 1 and 40 microseconds
 # set filters to be number of pusles everytime
 # set 34 max range
 # make altitude constant
@@ -104,8 +104,7 @@ done = False
 while not done:
     range = env.truth[env.timesteps].state_vector[0]
     velocity = env.truth[env.timesteps].state_vector[1]
-    alt = alt if alt > 0 else abs(alt)
-
+    alt = 15
     ranges.append(range)
     velocities.append(velocity)
     alts.append(alt)
