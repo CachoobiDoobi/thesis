@@ -60,7 +60,7 @@ truth_alt = GroundTruthPath(
 
 # 1d model
 truth = GroundTruthPath(
-    [GroundTruthState(4e4, 300, timestamp=start_time)])
+    [GroundTruthState([4e4, 300], timestamp=start_time)])
 
 env = TrackingEnv(env_config=env_config)
 pds = []
