@@ -23,7 +23,7 @@ spec:
         args:
           - -c
           - "git clone https://gitlab.tsn.tno.nl/gaghir/thesis.git
-                --branch main
+                --branch genetic_algorithm
                 --single-branch
                 project;
             cd project;

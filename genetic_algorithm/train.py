@@ -97,7 +97,7 @@ def evalFunction(individual, range_, velocity, altitude, rainfall_rate=2.8 * 10e
     return reward_pd, ratio
 
 
-@ray.remote
+# @ray.remote
 def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
     # start_time = time.time()
     # Define the problem as a maximization problem
@@ -177,5 +177,5 @@ def train(wind_speed=40, rcs=1, rainfall_rate=2.8 * 10e-7):
     return pds, ratios
 
 if __name__ == "__main__":
-    # train()
-    train.remote()
+    train()
+    # train.remote()

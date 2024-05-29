@@ -94,13 +94,13 @@ env = TrackingEnv(env_config=config["env_config"])
 
 obs, _ = env.reset()
 
-env.wind_speed = 40
+env.wind_speed = 18
 
-env.altitude = 10
+env.altitude = 15
 
 env.rcs = 1
 
-env.rainfall_rate = 2.7 * 10e-7
+env.rainfall_rate = (2.7 * 10e-7) / 25
 
 done = False
 while not done:

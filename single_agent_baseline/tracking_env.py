@@ -80,35 +80,35 @@ class TrackingEnv(MultiAgentEnv):
 
         transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
 
-        truth_alt = GroundTruthPath(
-            [GroundTruthState([np.random.uniform(10, 30), np.random.uniform(1, 3)], timestamp=start_time)])
+        # truth_alt = GroundTruthPath(
+        #     [GroundTruthState([np.random.uniform(10, 30), np.random.uniform(1, 3)], timestamp=start_time)])
 
         # 1d model
         truth = GroundTruthPath(
-            [GroundTruthState([np.random.uniform(1e4, 5e4), np.random.uniform(100, 500)], timestamp=start_time)])
+            [GroundTruthState([np.random.uniform(1e4, 3e4), np.random.uniform(100, 500)], timestamp=start_time)])
 
         for k in range(1, self.timestep_limit):
             truth.append(GroundTruthState(
                 transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
                 timestamp=start_time + timedelta(seconds=k)))
-            truth_alt.append(GroundTruthState(
-                transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
-                timestamp=start_time + timedelta(seconds=k)))
+            # truth_alt.append(GroundTruthState(
+            #     transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+            #     timestamp=start_time + timedelta(seconds=k)))
             # print(truth[k].state_vector[0], truth[k].state_vector[1])
 
         self.truth = truth
 
-        self.truth_alt = truth_alt
+        # self.truth_alt = truth_alt
 
         self.target_resolution = np.random.choice(np.arange(20, 40))
 
         self.sim = CarpetSimulation()
 
-        self.wind_speed = np.random.uniform(0, 40)
+        self.wind_speed = np.random.uniform(0, 18)
 
-        self.rcs = np.random.uniform(1, 10)
+        self.rcs = np.random.uniform(0.1, 5)
 
-        self.rainfall_rate = np.random.uniform(0, 2.8) * 10e-7
+        self.rainfall_rate = np.random.uniform(0, 2.8 / 25) * 10e-7
 
         return self._get_obs(), {}
 
@@ -244,7 +244,7 @@ class TrackingEnv(MultiAgentEnv):
 
         self.ratios.append(ratio)
 
-        sigma = 0.25
+        sigma = 0.75
         reward_time = math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
         if len(self.agent_ids) > 1:
             return {0: reward_pd, 1: reward_time}
