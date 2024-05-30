@@ -44,6 +44,7 @@ agent = Algorithm.from_checkpoint(cdir)
 
 @ray.remote
 def run_simulation(env_config, agent, r, w, rainfall_rate, num_iterations, alt):
+    agent = Algorithm.from_checkpoint(cdir)
     env = TrackingEnv(env_config=env_config)
     pds = 0
     ratios = 0
