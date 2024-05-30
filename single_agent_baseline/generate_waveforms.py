@@ -60,7 +60,7 @@ transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
 
 # 1d model
 truth = GroundTruthPath(
-    [GroundTruthState([np.random.uniform(1e4, 3e4), np.random.uniform(100, 500)], timestamp=start_time)])
+    [GroundTruthState([np.random.uniform(2.8e4, 3e4), np.random.uniform(100, 500)], timestamp=start_time)])
 
 for k in range(1, 20):
     truth.append(GroundTruthState(
@@ -98,7 +98,7 @@ env.wind_speed = 18
 
 env.altitude = 15
 
-env.rcs = 0.5
+env.rcs = 0.1
 
 env.rainfall_rate = (2.8 * 10e-7) / 25
 done = False
