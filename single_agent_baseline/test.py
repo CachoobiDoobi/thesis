@@ -1,11 +1,9 @@
 import logging
-
 import numpy as np
 import ray
 from carpet import carpet
 from gymnasium.spaces import Dict, Box, MultiDiscrete
 from ray.rllib.algorithms import Algorithm
-
 from utils import plot_heatmaps_rcs_wind, plot_heatmaps_rcs_rainfall, plot_heatmaps_wind_rainfall
 from tracking_env import TrackingEnv
 
@@ -35,171 +33,85 @@ observation_space = Dict(
 env_config = {
     "ts": 20,
     'agents': agents,
-    # Actions -> [pulse_duration, n_pulses, bandwidth, PRF]
     'action_space': action_space,
-    # observe actions of other agents, and previous measurement
     'observation_space': observation_space
 }
 
 ray.init()
 
-cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_a85c3_00000_0_2024-04-28_12-05-51/checkpoint_000000'
-
+cdir = '/nas-tmp/Radu/baseline/results/single_agent_baseline/PPO_TrackingEnv_37af9_00000_0_2024-05-29_09-02-46/checkpoint_000000'
 agent = Algorithm.from_checkpoint(cdir)
-# agent.restore(checkpoint_path=os.path.join(checkpoint_dir, "params.pkl"))
 
-env = TrackingEnv(env_config=env_config)
-pds = []
-ratios = []
-track = []
+@ray.remote
+def run_simulation(env_config, agent, r, w, rainfall_rate, num_iterations, alt):
+    env = TrackingEnv(env_config=env_config)
+    pds = 0
+    ratios = 0
+    track = 0
 
-num_iterations = 1000
-for _ in range(num_iterations):
+    for _ in range(num_iterations):
+        obs, _ = env.reset()
+        env.wind_speed = w
+        env.rcs = r
+        env.rainfall_rate = rainfall_rate
+        env.altitude = alt
 
-    obs, _ = env.reset()
+        done = False
+        while not done:
+            parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
+            actions = {0: parameters_1}
+            obs, rewards, terminateds, truncateds, _ = env.step(actions)
+            done = terminateds["__all__"]
 
-    env.wind_speed = 40
+        pds += np.mean(env.pds)
+        ratios += np.mean(env.ratios)
+        track += np.mean(carpet.firm_track_probability(env.pds))
 
-    env.altitude = 10
+    return pds / num_iterations, ratios / num_iterations, track / num_iterations
 
-    env.rcs = 1
+def create_tasks(parameter_grid, num_iterations, alt):
+    tasks = []
+    for (r, w, rainfall_rate) in parameter_grid:
+        tasks.append(run_simulation.remote(env_config, agent, r, w, rainfall_rate, num_iterations, alt))
+    return tasks
 
-    env.rainfall_rate = 2.7 * 10e-7
-    done = False
-    while not done:
-        parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-
-        actions = {0: parameters_1}
-        # print(f"Parameters: {None} given observation at previous timestep: {obs}")
-        obs, rewards, terminateds, truncateds, _ = env.step(actions)
-
-        done = terminateds["__all__"]
-    pds.append(env.pds)
-    ratios.append(env.ratios)
-    track.append(carpet.firm_track_probability(env.pds))
-
-# env.render_with_variance(pds=pds, ratios=ratios, track_probs=track)
-env.render_hist(pds=pds, ratios=ratios, track_probs=track)
-env.render_hist_treshold(pds=pds, ratios=ratios, track_probs=track)
-
-# TODO fix color scale so we can compare among all models and heatmaps
-# TODO fix scale so it starts from the actual value of the parameter
-
-pds = np.zeros((20, 20))
-ratios = np.zeros((20, 20))
-track = np.zeros((20, 20))
-
-rcs = np.linspace(1, 20, num=20)
-wind_speed = np.linspace(start=0, stop=40, num=20)
-rainfall_rate = np.linspace(start=0, stop=2.8 * 1e-6, num=20)
-
+rcs = np.linspace(0.1, 5, num=20)
+wind_speed = np.linspace(start=0, stop=18, num=20)
+rainfall_rate = np.linspace(start=0, stop=(2.7 * 10e-7) / 25, num=20)
 num_iterations = 100
 
-for i, r in enumerate(rcs):
-    for j, w in enumerate(wind_speed):
-        for _ in range(num_iterations):
+# Create parameter grids
+parameter_grid_rcs_wind = [(r, w, rainfall_rate[-1]) for r in rcs for w in wind_speed]
+parameter_grid_rcs_rainfall = [(r, wind_speed[-1], r_rate) for r in rcs for r_rate in rainfall_rate]
+parameter_grid_wind_rainfall = [(rcs[0], w, r_rate) for w in wind_speed for r_rate in rainfall_rate]
 
-            obs, _ = env.reset()
+# Run simulations in parallel
+tasks_rcs_wind = create_tasks(parameter_grid_rcs_wind, num_iterations, 15)
+tasks_rcs_rainfall = create_tasks(parameter_grid_rcs_rainfall, num_iterations, 15)
+tasks_wind_rainfall = create_tasks(parameter_grid_wind_rainfall, num_iterations, 15)
 
-            env.wind_speed = w
+results_rcs_wind = ray.get(tasks_rcs_wind)
+results_rcs_rainfall = ray.get(tasks_rcs_rainfall)
+results_wind_rainfall = ray.get(tasks_wind_rainfall)
 
-            env.rcs = r
+# Aggregate results
+def aggregate_results(results, shape):
+    pds = np.zeros(shape)
+    ratios = np.zeros(shape)
+    track = np.zeros(shape)
+    for idx, (pds_val, ratios_val, track_val) in enumerate(results):
+        i = idx // shape[1]
+        j = idx % shape[1]
+        pds[i, j] = pds_val
+        ratios[i, j] = ratios_val
+        track[i, j] = track_val
+    return pds, ratios, track
 
-            env.rainfall_rate = 2.7 * 10e-7
+pds_rcs_wind, ratios_rcs_wind, track_rcs_wind = aggregate_results(results_rcs_wind, (20, 20))
+plot_heatmaps_rcs_wind(pds_rcs_wind, ratios_rcs_wind, track_rcs_wind)
 
-            env.altitude = 10
+pds_rcs_rainfall, ratios_rcs_rainfall, track_rcs_rainfall = aggregate_results(results_rcs_rainfall, (20, 20))
+plot_heatmaps_rcs_rainfall(pds_rcs_rainfall, ratios_rcs_rainfall, track_rcs_rainfall)
 
-            done = False
-            while not done:
-                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-
-                actions = {0: parameters_1}
-                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
-                obs, rewards, terminateds, truncateds, _ = env.step(actions)
-
-                done = terminateds["__all__"]
-            pds[i, j] += np.mean(env.pds)
-            ratios[i, j] += np.mean(env.ratios)
-            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
-
-pds = pds / num_iterations
-ratios = ratios / num_iterations
-track = track / num_iterations
-
-plot_heatmaps_rcs_wind(pds, ratios, track)
-
-pds = np.zeros((20, 20))
-ratios = np.zeros((20, 20))
-track = np.zeros((20, 20))
-
-for i, r in enumerate(rcs):
-    for j, w in enumerate(rainfall_rate):
-        for _ in range(num_iterations):
-
-            obs, _ = env.reset()
-
-            env.wind_speed = 40
-
-            env.rcs = r
-
-            env.rainfall_rate = w
-
-            env.altitude = 10
-
-            done = False
-            while not done:
-                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-
-                actions = {0: parameters_1}
-                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
-                obs, rewards, terminateds, truncateds, _ = env.step(actions)
-
-                done = terminateds["__all__"]
-            pds[i, j] += np.mean(env.pds)
-            ratios[i, j] += np.mean(env.ratios)
-            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
-
-pds = pds / num_iterations
-ratios = ratios / num_iterations
-track = track / num_iterations
-
-plot_heatmaps_rcs_rainfall(pds, ratios, track)
-
-########################
-
-pds = np.zeros((20, 20))
-ratios = np.zeros((20, 20))
-track = np.zeros((20, 20))
-
-for i, w in enumerate(wind_speed):
-    for j, r in enumerate(rainfall_rate):
-        for _ in range(num_iterations):
-
-            obs, _ = env.reset()
-
-            env.wind_speed = w
-
-            env.rcs = 1
-
-            env.rainfall_rate = r
-
-            env.altitude = 10
-
-            done = False
-            while not done:
-                parameters_1 = agent.compute_single_action(obs[0], policy_id='pol1')
-
-                actions = {0: parameters_1}
-                # print(f"Parameters: {None} given observation at previous timestep: {obs}")
-                obs, rewards, terminateds, truncateds, _ = env.step(actions)
-
-                done = terminateds["__all__"]
-            pds[i, j] += np.mean(env.pds)
-            ratios[i, j] += np.mean(env.ratios)
-            track[i, j] += np.mean(carpet.firm_track_probability(env.pds))
-
-pds = pds / num_iterations
-ratios = ratios / num_iterations
-track = track / num_iterations
-
-plot_heatmaps_wind_rainfall(pds, ratios, track)
+pds_wind_rainfall, ratios_wind_rainfall, track_wind_rainfall = aggregate_results(results_wind_rainfall, (20, 20))
+plot_heatmaps_wind_rainfall(pds_wind_rainfall, ratios_wind_rainfall, track_wind_rainfall)
