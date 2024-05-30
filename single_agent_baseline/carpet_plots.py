@@ -30,10 +30,10 @@ class CarpetSimulation:
         carpet.Target_RCS1 = rcs
         carpet.Propagation_WindDirection = np.pi
         carpet.Propagation_Vwind = wind_speed
-        carpet.Clutter_RainPresent = False
+        carpet.Clutter_RainPresent = True
         carpet.Clutter_RainfallRate = rainfall_rate
-        # what is this?
-        carpet.Processing_M = 3
+        carpet.Clutter_RainRange = 0
+        carpet.Clutter_RainDiameter = 1e6
 
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]
@@ -90,6 +90,17 @@ ranges = np.loadtxt("ranges.txt")
 velocities = np.loadtxt("velocities.txt")
 alts = np.loadtxt("alts.txt")
 
-for i in range(10):
+pulse_durations = [param_dict['pulse_duration'][pd] for pd in actions[2][0]["pulse_duration"]]
+pris = [param_dict['PRI'][pri] for pri in actions[2][0]["PRI"]]
+n_pulses = actions[2][0]['n_pulses']
+rfs = [param_dict['RF'][rf] for rf in actions[2][0]["RF"]]
+
+print(f"Pulse Durations: {pulse_durations}")
+print(f"Number of pulses: {n_pulses}")
+print(f"PRI: {pris}")
+print(f"RF: {rfs}")
+
+for i in range(0, 20):
+    print(actions[i][0])
     sim = CarpetSimulation()
     sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
