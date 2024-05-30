@@ -52,20 +52,30 @@ config = {
 agent = PPO(env=TrackingEnv, config=config)
 agent.restore(checkpoint_dir)
 
-def run_simulation(agent, env_config, p1, p2, p_fixed, num_iterations, alt):
+def run_simulation(agent, env_config, p1, p2, param_to_vary, num_iterations, alt):
     env = TrackingEnv(env_config=EnvContext(env_config, 0))
     pds = np.zeros((len(p1), len(p2)))
     ratios = np.zeros((len(p1), len(p2)))
     track = np.zeros((len(p1), len(p2)))
 
-    for i, r in enumerate(p1):
-        for j, w in enumerate(p2):
+    for i, val1 in enumerate(p1):
+        for j, val2 in enumerate(p2):
             for _ in range(num_iterations):
                 obs, _ = env.reset()
 
-                env.wind_speed = w
-                env.rcs = r
-                env.rainfall_rate = p_fixed
+                if param_to_vary == 'rcs_wind':
+                    env.rcs = val1
+                    env.wind_speed = val2
+                    env.rainfall_rate = p_fixed
+                elif param_to_vary == 'rcs_rainfall':
+                    env.rcs = val1
+                    env.rainfall_rate = val2
+                    env.wind_speed = p_fixed
+                elif param_to_vary == 'wind_rainfall':
+                    env.wind_speed = val1
+                    env.rainfall_rate = val2
+                    env.rcs = p_fixed
+
                 env.altitude = alt
 
                 done = False
@@ -87,11 +97,13 @@ rainfall_rate = np.linspace(start=0, stop=(2.7 * 10e-7) / 25, num=20)
 num_iterations = 100
 
 # Run simulations sequentially
-pds_rcs_wind, ratios_rcs_wind, track_rcs_wind = run_simulation(agent, env_config, rcs, wind_speed, rainfall_rate[-1], num_iterations, 15)
+p_fixed = 15
+
+pds_rcs_wind, ratios_rcs_wind, track_rcs_wind = run_simulation(agent, env_config, rcs, wind_speed, 'rcs_wind', num_iterations, p_fixed)
 plot_heatmaps_rcs_wind(pds_rcs_wind, ratios_rcs_wind, track_rcs_wind)
 
-pds_rcs_rainfall, ratios_rcs_rainfall, track_rcs_rainfall = run_simulation(agent, env_config, rcs, rainfall_rate, wind_speed[-1], num_iterations, 15)
+pds_rcs_rainfall, ratios_rcs_rainfall, track_rcs_rainfall = run_simulation(agent, env_config, rcs, rainfall_rate, 'rcs_rainfall', num_iterations, p_fixed)
 plot_heatmaps_rcs_rainfall(pds_rcs_rainfall, ratios_rcs_rainfall, track_rcs_rainfall)
 
-pds_wind_rainfall, ratios_wind_rainfall, track_wind_rainfall = run_simulation(agent, env_config, wind_speed, rainfall_rate, rcs[0], num_iterations, 15)
+pds_wind_rainfall, ratios_wind_rainfall, track_wind_rainfall = run_simulation(agent, env_config, wind_speed, rainfall_rate, 'wind_rainfall', num_iterations, p_fixed)
 plot_heatmaps_wind_rainfall(pds_wind_rainfall, ratios_wind_rainfall, track_wind_rainfall)
