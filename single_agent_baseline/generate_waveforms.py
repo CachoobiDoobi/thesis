@@ -51,24 +51,25 @@ agent = Algorithm.from_checkpoint(cdir)
 
 start_time = datetime.now()
 
-transition_model_altitude = CombinedLinearGaussianTransitionModel([ConstantVelocity(100)])
+# transition_model_altitude = CombinedLinearGaussianTransitionModel([ConstantVelocity(100)])
 
 transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
 
-truth_alt = GroundTruthPath(
-    [GroundTruthState([15, 2], timestamp=start_time)])
+# truth_alt = GroundTruthPath(
+#     [GroundTruthState([np.random.uniform(10, 30), np.random.uniform(1, 3)], timestamp=start_time)])
 
 # 1d model
 truth = GroundTruthPath(
-    [GroundTruthState([4e4, 300], timestamp=start_time)])
+    [GroundTruthState([np.random.uniform(1e4, 3e4), np.random.uniform(100, 500)], timestamp=start_time)])
 
 for k in range(1, 20):
     truth.append(GroundTruthState(
         transition_model.function(truth[k - 1], noise=True, time_interval=timedelta(seconds=1)),
         timestamp=start_time + timedelta(seconds=k)))
-    truth_alt.append(GroundTruthState(
-        transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
-        timestamp=start_time + timedelta(seconds=k)))
+    # truth_alt.append(GroundTruthState(
+    #     transition_model_altitude.function(truth_alt[k - 1], noise=True, time_interval=timedelta(seconds=1)),
+    #     timestamp=start_time + timedelta(seconds=k)))
+    # print(truth[k].state_vector[0], truth[k].state_vector[1])
 
 env = TrackingEnv(env_config=env_config)
 pds = []
@@ -81,7 +82,7 @@ alts = []
 
 obs, _ = env.reset()
 env.truth = truth
-env.truth_alt = truth_alt
+# env.truth_alt = truth_alt
 
 
 # max wind speed should be 18m/s
@@ -97,7 +98,7 @@ env.wind_speed = 18
 
 env.altitude = 15
 
-env.rcs = 1
+env.rcs = 0.5
 
 env.rainfall_rate = (2.8 * 10e-7) / 25
 done = False
