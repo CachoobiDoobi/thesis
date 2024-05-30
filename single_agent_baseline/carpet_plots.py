@@ -85,11 +85,11 @@ class CarpetSimulation:
 
 
 actions = np.load("waveforms.txt.npy", allow_pickle=True)
-print(actions)
+print(actions[2][0])
 ranges = np.loadtxt("ranges.txt")
 velocities = np.loadtxt("velocities.txt")
 alts = np.loadtxt("alts.txt")
 
 for i in range(10):
     sim = CarpetSimulation()
-    sim.detect(actions[0], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
+    sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
