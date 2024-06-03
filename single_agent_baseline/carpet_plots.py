@@ -100,7 +100,7 @@ print(f"Number of pulses: {n_pulses}")
 print(f"PRI: {pris}")
 print(f"RF: {rfs}")
 
-for i in range(0, 20):
+for i in range(2, 3):
     print(actions[i][0])
     sim = CarpetSimulation()
     sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
