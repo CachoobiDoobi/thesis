@@ -108,7 +108,7 @@ class TrackingEnv(MultiAgentEnv):
 
         self.rcs = np.random.uniform(0.1, 5)
 
-        self.rainfall_rate = np.random.uniform(0, 2.8 / 25) * 10e-7
+        self.rainfall_rate = np.random.uniform(0, 2.8 / 25) * 10e-6
 
         return self._get_obs(), {}
 
