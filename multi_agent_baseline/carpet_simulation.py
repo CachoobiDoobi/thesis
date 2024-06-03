@@ -33,7 +33,7 @@ class CarpetSimulation:
         carpet.Clutter_RainPresent = True
         carpet.Clutter_RainfallRate = rainfall_rate
         carpet.Clutter_RainRange = 0
-        carpet.Clutter_RainDiameter = 1e6
+        carpet.Clutter_RainDiameter = 1.2e5
         # what is this?
         carpet.Processing_M = 3
         for m, agent in enumerate(action_dict):

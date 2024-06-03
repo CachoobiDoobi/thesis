@@ -62,13 +62,13 @@ class CarpetSimulation:
         # pds = carpet.detection_probability(ground_ranges=range_, radial_velocities=velocity, altitudes=altitude)
         # scnr = carpet.signal_clutter_noise_power_ratio(ground_ranges=range_, radial_velocities=velocity,altitudes=altitude)
 
-        data = carpet.detection_probability(ground_ranges=np.linspace(start=1e4, stop=5e4, num=1000),
-                                            radial_velocities=np.linspace(start=100, stop=500, num=500), altitudes=altitude)
+        data = carpet.detection_probability(ground_ranges=np.linspace(start=1200, stop=6e4, num=1000),
+                                            radial_velocities=np.linspace(start=0, stop=300, num=500), altitudes=altitude)
 
         carpet.save_config("carpet_radu")
-        print(data.shape)
+        print(np.nanmean(data))
         # # Create a heatmap trace
-        heatmap = go.Heatmap(z=data,x=np.linspace(start=1e4, stop=5e4, num=1000),y=np.linspace(start=100, stop=500, num=500), zmin=0, zmax=1)
+        heatmap = go.Heatmap(z=data,x=np.linspace(start=0, stop=6e4, num=1000),y=np.linspace(start=0, stop=300, num=500), zmin=0, zmax=1)
 
         layout = go.Layout(
             title='PD',
@@ -80,7 +80,7 @@ class CarpetSimulation:
         # Create figure
         fig1 = go.Figure(data=heatmap, layout=layout)
 
-        fig1.add_trace(go.Scatter(x=[range_], y=[velocity], ))
+        # fig1.add_trace(go.Scatter(x=[range_], y=[velocity], ))
         fig1.show()
 
 
