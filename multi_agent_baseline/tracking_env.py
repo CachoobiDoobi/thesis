@@ -243,7 +243,7 @@ class TrackingEnv(MultiAgentEnv):
 
         self.ratios.append(ratio)
 
-        sigma = 0.25
+        sigma = 0.75
         reward_time = math.exp(-(ratio - 1) ** 2 / (2 * sigma ** 2))  # Gaussian function
         if len(self.agent_ids) > 1:
             return {0: reward_pd, 1: reward_time}
