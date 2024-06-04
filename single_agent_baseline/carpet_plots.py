@@ -33,7 +33,7 @@ class CarpetSimulation:
         carpet.Clutter_RainPresent = True
         carpet.Clutter_RainfallRate = rainfall_rate
         carpet.Clutter_RainRange = 0
-        carpet.Clutter_RainDiameter = 1e6
+        carpet.Clutter_RainDiameter = 1.2 * 1e5
 
         for m, agent in enumerate(action_dict):
             parameters = action_dict[agent]
@@ -53,7 +53,7 @@ class CarpetSimulation:
                 setattr(carpet, f"Transmitter_NrFilters{i}", int(n_pulseses[n - 1]))
                 # carpet.Transmitter_NrFilters
 
-        assert range_ > 0, "NEGATIVE RANGE"
+        # assert range_ > 0, "NEGATIVE RANGE"
 
         # carpet.Target_GroundRange = range_
         # carpet.Target_RadialVelocity = velocity
@@ -66,7 +66,8 @@ class CarpetSimulation:
                                             radial_velocities=np.linspace(start=0, stop=500, num=500), altitudes=altitude)
 
         carpet.save_config("carpet_radu")
-        # print(np.nanmean(data))
+        data = np.nan_to_num(data)
+        print(np.mean(data))
         # # Create a heatmap trace
         heatmap = go.Heatmap(z=data,x=np.linspace(start=0, stop=6e4, num=1000),y=np.linspace(start=0, stop=500, num=500), zmin=0, zmax=1)
 
@@ -100,7 +101,7 @@ print(f"Number of pulses: {n_pulses}")
 print(f"PRI: {pris}")
 print(f"RF: {rfs}")
 
-for i in range(0, 19):
-    print(actions[i][0])
+for i in range(0, 2):
+    print(f"index {i}")
     sim = CarpetSimulation()
-    sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=1, rainfall_rate=(2.7 * 10e-7)/25)
+    sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=0.1, rainfall_rate=(2.7 * 10e-6)/25)
