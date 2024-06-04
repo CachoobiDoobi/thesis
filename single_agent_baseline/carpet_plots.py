@@ -66,8 +66,7 @@ class CarpetSimulation:
                                             radial_velocities=np.linspace(start=0, stop=500, num=500), altitudes=altitude)
 
         carpet.save_config("carpet_radu")
-        data = np.nan_to_num(data)
-        print(np.mean(data))
+        print(np.mean(np.nan_to_num(data)))
         # # Create a heatmap trace
         heatmap = go.Heatmap(z=data,x=np.linspace(start=0, stop=6e4, num=1000),y=np.linspace(start=0, stop=500, num=500), zmin=0, zmax=1)
 
@@ -85,11 +84,15 @@ class CarpetSimulation:
         fig1.show()
 
 
-actions = np.load("waveforms.txt.npy", allow_pickle=True)
-print(actions[2][0])
-ranges = np.loadtxt("ranges.txt")
-velocities = np.loadtxt("velocities.txt")
-alts = np.loadtxt("alts.txt")
+# actions = np.load("waveforms.txt.npy", allow_pickle=True)
+# ranges = np.loadtxt("ranges.txt")
+# velocities = np.loadtxt("velocities.txt")
+# alts = np.loadtxt("alts.txt")
+
+actions = np.load("shorter_sim/waveforms.txt.npy", allow_pickle=True)
+ranges = np.loadtxt("shorter_sim/ranges.txt")
+velocities = np.loadtxt("shorter_sim/velocities.txt")
+alts = np.loadtxt("shorter_sim/alts.txt")
 
 pulse_durations = [param_dict['pulse_duration'][pd] for pd in actions[2][0]["pulse_duration"]]
 pris = [param_dict['PRI'][pri] for pri in actions[2][0]["PRI"]]
@@ -101,7 +104,7 @@ print(f"Number of pulses: {n_pulses}")
 print(f"PRI: {pris}")
 print(f"RF: {rfs}")
 
-for i in range(0, 2):
+for i in range(0, 10):
     print(f"index {i}")
     sim = CarpetSimulation()
     sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=0.1, rainfall_rate=(2.7 * 10e-6)/25)

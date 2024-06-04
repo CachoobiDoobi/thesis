@@ -60,7 +60,7 @@ transition_model = CombinedLinearGaussianTransitionModel([ConstantVelocity(1)])
 
 # 1d model
 truth = GroundTruthPath(
-    [GroundTruthState([np.random.uniform(1.5e4, 3e4), np.random.uniform(100, 500)], timestamp=start_time)])
+    [GroundTruthState([np.random.uniform(1.5e4, 2e4), np.random.uniform(100, 500)], timestamp=start_time)])
 
 for k in range(1, 20):
     truth.append(GroundTruthState(
