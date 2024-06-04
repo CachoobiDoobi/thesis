@@ -96,7 +96,7 @@ obs, _ = env.reset()
 
 env.wind_speed = 18
 
-env.altitude = 15
+env.altitude = 10
 
 env.rcs = .1
 
