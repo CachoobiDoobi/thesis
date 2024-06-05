@@ -68,20 +68,20 @@ class CarpetSimulation:
         carpet.save_config("carpet_radu")
         print(np.mean(np.nan_to_num(data)))
         # # Create a heatmap trace
-        heatmap = go.Heatmap(z=data,x=np.linspace(start=0, stop=6e4, num=1000),y=np.linspace(start=0, stop=500, num=500), zmin=0, zmax=1)
+        # heatmap = go.Heatmap(z=data,x=np.linspace(start=0, stop=6e4, num=1000),y=np.linspace(start=0, stop=500, num=500), zmin=0, zmax=1)
 
-        layout = go.Layout(
-            title='PD',
-            xaxis=dict(title='Range'),
-            yaxis=dict(title='Velocity')
-        )
-
-
-        # Create figure
-        fig1 = go.Figure(data=heatmap, layout=layout)
-
-        fig1.add_trace(go.Scatter(x=[range_], y=[velocity], ))
-        fig1.show()
+        # layout = go.Layout(
+        #     title='PD',
+        #     xaxis=dict(title='Range'),
+        #     yaxis=dict(title='Velocity')
+        # )
+        #
+        #
+        # # Create figure
+        # fig1 = go.Figure(data=heatmap, layout=layout)
+        #
+        # fig1.add_trace(go.Scatter(x=[range_], y=[velocity], ))
+        # fig1.show()
 
 
 # actions = np.load("waveforms.txt.npy", allow_pickle=True)
@@ -104,7 +104,7 @@ print(f"Number of pulses: {n_pulses}")
 print(f"PRI: {pris}")
 print(f"RF: {rfs}")
 
-for i in range(0, 10):
+for i in range(0, 20):
     print(f"index {i}")
     sim = CarpetSimulation()
     sim.detect(actions[i], range_=ranges[i], velocity=velocities[i], altitude=alts[i], wind_speed=18, rcs=0.1, rainfall_rate=(2.7 * 10e-6)/25)
